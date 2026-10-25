@@ -160,7 +160,7 @@
   .directions li::marker { font-size: 13px; }
   .scenario { white-space: pre-wrap; }
   .avatar {
-    flex: none; border-radius: 50%;
+    flex: none; border-radius: 50%; object-fit: cover; display: block;
     display: grid; place-items: center; font-weight: 600; color: #fff;
   }
   .student { display: flex; gap: 26px; align-items: flex-start; margin: 0 0 26px; font-size: 17px; line-height: 1.6; }
@@ -623,10 +623,16 @@
   let clip = '';
   let undoStack = [], redoStack = [], lastSnap = null;
 
-  const AVATAR = ['#3b6fb6', '#b5523b', '#4b8a5a', '#7a4fa3'];
-  const initial = (n) => (n.trim()[0] || '?').toUpperCase();
-  const student = (name, text, color) => `<div class="student">
-    <div class="who"><div class="avatar" style="background:${color}">${esc(initial(name))}</div>${esc(name)}</div>
+  // 얼굴 그림 6개(img/face1~6.png) 중 3개를 이름으로 정해서 고름 → 같은 문제는 항상 같은 얼굴
+  const pickFaces = (key) => {
+    let h = 0; for (const c of key) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    const pool = [1, 2, 3, 4, 5, 6], out = [];
+    while (out.length < 3) { h = (h * 1103515245 + 12345) >>> 0; out.push(pool.splice(h % pool.length, 1)[0]); }
+    return out.map(n => `img/face${n}.png`);
+  };
+  const face = (src) => `<img class="avatar" src="${src}" alt="">`;
+  const student = (name, text, img) => `<div class="student">
+    <div class="who">${face(img)}${esc(name)}</div>
     <div class="text">${esc(text)}</div></div>`;
 
   function renderProblem(p) {
@@ -646,17 +652,18 @@
       $('ef-subject-in').value = ''; $('ef-subject-in').readOnly = false;
       $('ef-subject-in').classList.toggle('hidden', !!p.subject);
     } else {
+      const faces = pickFaces(p.prof + '|' + p.s1name + '|' + p.s2name);
       $('pane-left').innerHTML = `<div class="directions">
         <p>Your professor is teaching a class on ${esc(p.course || '___')}. Write a post responding to the professor's question.</p>
         <p class="lead">In your response, you should do the following.</p>
         <ul><li>Express and support your opinion.</li><li>Make a contribution to the discussion in your own words.</li></ul>
         <p style="margin-bottom:30px">An effective response will contain at least 100 words.</p>
-        <div class="prof"><div class="avatar" style="background:#2c6b70">${esc(initial(p.prof))}</div><div class="name">${esc(p.prof)}</div></div>
+        <div class="prof">${face(faces[0])}<div class="name">${esc(p.prof)}</div></div>
         <p class="prof-q">${esc(p.question)}</p>
       </div>`;
       $('pane-right-top').innerHTML = `
-        ${student(p.s1name, p.s1post, AVATAR[0])}
-        ${student(p.s2name, p.s2post, AVATAR[1])}`;
+        ${student(p.s1name, p.s1post, faces[1])}
+        ${student(p.s2name, p.s2post, faces[2])}`;
       $('email-fields').classList.add('hidden');
       $('exam').classList.remove('email');
     }
