@@ -358,9 +358,9 @@
 
   const show = (id) => ['setup', 'exam', 'result'].forEach(x => $(x).classList.toggle('hidden', x !== id));
 
-  // 시험 화면은 1360×765 기준으로 디자인 → 실제 시험 환경인 1920×1080에서 약 1.41배로 실제 화면과 같은 비율.
+  // 시험 화면은 1400×788 기준으로 디자인 → 실제 시험 환경인 1920×1080에서 약 1.37배로 실제 화면과 같은 비율.
   const fitExam = () => {
-    const z = Math.min(1.6, Math.max(1, Math.min(innerWidth / 1360, innerHeight / 765)));
+    const z = Math.min(1.6, Math.max(1, Math.min(innerWidth / 1400, innerHeight / 788)));
     $('exam').style.zoom = z;
     $('exam').style.height = z === 1 ? '' : (innerHeight / z) + 'px';
   };
