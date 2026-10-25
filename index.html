@@ -47,7 +47,12 @@
   }
   .setup { max-width: 760px; margin: 0 auto; padding: 28px 16px 60px; }
   .hero { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
-  .hero h1 { font-size: 20px; font-weight: 600; margin: 0 0 12px; }
+  .hero .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; }
+  .hero h1 { font-size: 20px; font-weight: 600; margin: 0; }
+  .seg { display: inline-flex; border: 1px solid var(--accent); border-radius: 8px; overflow: hidden; }
+  .seg button { border: none; background: #fff; color: var(--accent); padding: 7px 16px; font-size: 14px; font-weight: 600; }
+  .seg button + button { border-left: 1px solid var(--accent); }
+  .seg button.on { background: var(--accent); color: #fff; }
   .hero textarea.field { min-height: 240px; border-radius: 8px; font-size: 15px; line-height: 1.55; padding: 12px 14px; }
   .hero .go { display: flex; align-items: center; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
   .hero .go .btn.primary { padding: 10px 34px; font-size: 16px; font-weight: 600; border-radius: 8px; }
@@ -215,8 +220,14 @@
 <div class="setup-head">Writing Practice</div>
 <div id="setup" class="setup">
   <div class="hero">
-    <h1>문제 붙여넣기</h1>
-    <textarea class="field" id="raw" placeholder="문제 전체를 그대로 붙여넣으세요. Email / Discussion은 자동으로 알아냅니다."></textarea>
+    <div class="top">
+      <h1>문제 붙여넣기</h1>
+      <div class="seg" id="raw-type">
+        <button data-type="email" class="on">Write an Email</button>
+        <button data-type="discussion">Academic Discussion</button>
+      </div>
+    </div>
+    <textarea class="field" id="raw" placeholder="문제 전체를 그대로 붙여넣으세요."></textarea>
     <div class="go">
       <button class="btn primary" id="raw-start">시작</button>
     </div>
@@ -456,11 +467,11 @@
 
   // ---------- 통째로 붙여넣기 인식 ----------
   const BULLET = /^\s*(?:[•●▪◦·∙\-*–—]|\d{1,2}[.)])\s+/;
-  function parseProblem(raw, fallbackType) {
+  function parseProblem(raw, fallbackType, forced) {
     const lines = raw.replace(/\r/g, '').replace(/ /g, ' ').split('\n').map(s => s.trim());
     const isEmail = /in your email|write an email to|^\s*(to|subject)\s*:/im.test(raw);
     const isDisc = /professor|teaching a class|academic discussion|your response/i.test(raw);
-    const type = isEmail && !/teaching a class/i.test(raw) ? 'email' : isDisc ? 'discussion' : fallbackType;
+    const type = forced || (isEmail && !/teaching a class/i.test(raw) ? 'email' : isDisc ? 'discussion' : fallbackType);
     return type === 'email' ? parseEmail(lines) : parseDiscussion(lines, raw);
   }
   const joinPara = (ls) => ls.join('\n').replace(/\n{3,}/g, '\n\n').trim();
@@ -529,20 +540,32 @@
   function fromRaw() {
     const raw = $('raw').value;
     if (!raw.trim()) { $('raw-msg').textContent = '붙여넣은 내용이 없습니다.'; return null; }
-    const p = parseProblem(raw, curTab);
+    const p = parseProblem(raw, curTab, rawType);
     filledRaw = raw;
     fillForm(p, true);
     $('raw-msg').textContent = p.type === 'email'
-      ? `Email로 인식 · 할 일 ${p.tasks.length}개${p.to ? '' : ' · To 없음'}${p.subject ? '' : ' · Subject 없음'}`
-      : `Discussion으로 인식 · 교수 ${p.prof} · 학생 ${p.s1name}, ${p.s2name}`;
+      ? `Email · 할 일 ${p.tasks.length}개${p.to ? '' : ' · To 없음'}${p.subject ? '' : ' · Subject 없음'}`
+      : `Discussion · 교수 ${p.prof} · 학생 ${p.s1name}, ${p.s2name}`;
     return p;
   }
+  // 붙여넣기 문제 유형은 직접 고름 (자동 인식 X). 마지막 선택 기억.
+  let rawType = store.get('tw_rawtype', 'email');
+  const setRawType = (t) => {
+    rawType = t; store.set('tw_rawtype', t);
+    document.querySelectorAll('#raw-type button').forEach(b => b.classList.toggle('on', b.dataset.type === t));
+    document.querySelector(`.tab[data-tab="${t}"]`).click();
+    filledRaw = '';
+    if ($('manual').open && $('raw').value.trim()) fromRaw();
+  };
+  document.querySelectorAll('#raw-type button').forEach(b => b.onclick = () => setRawType(b.dataset.type));
+
   // 직접 입력을 펼칠 때, 새로 붙여넣은 내용이 있으면 그걸로 칸을 채워서 보여줌
   let filledRaw = '';
   $('manual').addEventListener('toggle', () => {
     const raw = $('raw').value;
     if ($('manual').open && raw.trim() && raw !== filledRaw) fromRaw();
   });
+  setRawType(rawType);
   $('raw-start').onclick = () => { const p = fromRaw(); if (p) startExam(p); };
   window.__parseProblem = parseProblem;
 
