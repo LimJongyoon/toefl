@@ -41,6 +41,8 @@
   .btn.danger { color: var(--danger); }
 
   /* ---------- 설정 화면 ---------- */
+  .home { cursor: pointer; }
+  .home:hover { opacity: .85; }
   .setup-head {
     background: var(--head); color: #fff; height: 53px; display: flex; align-items: center;
     padding: 0 22px; font-size: 22px; font-style: italic; font-weight: 600;
@@ -216,8 +218,8 @@
 <body>
 
 <!-- ===================== 설정 화면 ===================== -->
+<div class="setup-head" id="top-head"><span class="home" title="처음 화면으로">Writing Practice</span></div>
 <div id="setup-wrap">
-<div class="setup-head">Writing Practice</div>
 <div id="setup" class="setup">
   <div class="hero">
     <div class="top">
@@ -309,7 +311,7 @@
 <!-- ===================== 시험 화면 ===================== -->
 <div id="exam" class="exam hidden">
   <div class="exam-head">
-    <div class="title">Writing</div>
+    <div class="title"><span class="home" title="처음 화면으로">Writing</span></div>
     <button class="next" id="btn-next">Next <svg viewBox="0 0 12 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l7 7-7 7"/></svg></button>
   </div>
   <div class="subhead">
@@ -396,7 +398,10 @@
   const fmtShort = (sec) => { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); };
   const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const show = (id) => ['setup', 'exam', 'result'].forEach(x => $(x === 'setup' ? 'setup-wrap' : x).classList.toggle('hidden', x !== id));
+  const show = (id) => {
+    ['setup', 'exam', 'result'].forEach(x => $(x === 'setup' ? 'setup-wrap' : x).classList.toggle('hidden', x !== id));
+    $('top-head').classList.toggle('hidden', id === 'exam');
+  };
 
   // 시험 화면은 1400×788 기준으로 디자인 → 실제 시험 환경인 1920×1080에서 약 1.37배로 실제 화면과 같은 비율.
   const fitExam = () => {
@@ -833,6 +838,14 @@
   };
   $('r-retry').onclick = () => startExam(curRec.problem);
   $('r-home').onclick = () => show('setup');
+  // 좌상단 Writing 누르면 언제든 처음 화면으로 (시험 중이면 확인 후 중단)
+  document.querySelectorAll('.home').forEach(el => el.onclick = () => {
+    const inExam = !$('exam').classList.contains('hidden') && !finished;
+    if (inExam && !confirm('시험을 그만두고 처음 화면으로 갈까요? 쓰던 답안은 저장되지 않습니다.')) return;
+    if (inExam) { finished = true; clearInterval(tick); }
+    $('modal').classList.add('hidden');
+    show('setup'); window.scrollTo(0, 0);
+  });
 
   // 시험 중 새로고침/닫기 경고
   window.addEventListener('beforeunload', (e) => { if (!$('exam').classList.contains('hidden') && !finished) { e.preventDefault(); e.returnValue = ''; } });
