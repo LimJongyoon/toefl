@@ -152,15 +152,18 @@
   .toolbar .tbtn.on { background: var(--teal); color: #fff; font-weight: 600; }
   .toolbar .spacer { flex: 1; }
   .wc { font-size: 17px; white-space: nowrap; min-width: 1.6em; text-align: right; margin-left: 12px; font-variant-numeric: tabular-nums; }
-  .email-fields { border-bottom: 1px solid var(--x-line); font-size: 17px; }
-  .email-fields div + div { border-top: 1px solid var(--x-line); }
-  .email-fields div { padding: 8px 16px; overflow-wrap: anywhere; }
+  /* 이메일: 오른쪽 위 "Your Response", To/Subject는 박스 밖, 박스 안에 글 쓰는 칸이 한 겹 더 */
+  .resp-label { font-size: 18px; font-weight: 600; margin: 0 0 14px; }
+  .email-fields { font-size: 17px; margin: 0 0 16px; }
+  .email-fields div { padding: 3px 0; overflow-wrap: anywhere; }
   .email-fields span { color: #555; display: inline-block; min-width: 76px; }
   .email-fields b { font-weight: 400; }
   textarea.answer {
     width: 100%; flex: 1; min-height: 180px; resize: none; border: none; outline: none;
     padding: 14px 18px; font: 17px/1.6 "Open Sans", Arial, sans-serif; color: var(--x-ink); background: #fff;
   }
+  .exam.email .editor-wrap { border-bottom: 1px solid var(--x-line); border-radius: 14px; margin-bottom: 12px; }
+  .exam.email textarea.answer { width: auto; margin: 0 14px 14px; border: 1px solid #bdbdbd; border-radius: 6px; }
   textarea.answer[readonly] { background: #f4f4f4; color: #666; }
 
   /* ---------- 결과 화면 ---------- */
@@ -283,6 +286,10 @@
     <div class="pane left" id="pane-left"></div>
     <div class="pane right">
       <div id="pane-right-top"></div>
+      <div id="email-fields" class="email-fields hidden">
+        <div><span>To:</span> <b id="ef-to"></b></div>
+        <div><span>Subject:</span> <b id="ef-subject"></b><input type="text" id="ef-subject-in" class="hidden" spellcheck="false" autocomplete="off" style="border:none;outline:none;font:inherit;width:calc(100% - 72px);background:transparent;color:var(--ink)"></div>
+      </div>
       <div class="editor-wrap">
         <div class="toolbar">
           <button class="tbtn" data-cmd="cut">Cut</button>
@@ -292,10 +299,6 @@
           <span class="spacer"></span>
           <button class="linkbtn" id="toggle-wc"><span class="ico"></span><span class="lbl">Hide Word Count</span></button>
           <span class="wc" id="wc-box"><span id="wc">0</span></span>
-        </div>
-        <div id="email-fields" class="email-fields hidden">
-          <div><span>To:</span> <b id="ef-to"></b></div>
-          <div><span>Subject:</span> <b id="ef-subject"></b><input type="text" id="ef-subject-in" class="hidden" spellcheck="false" autocomplete="off" style="border:none;outline:none;font:inherit;width:calc(100% - 72px);background:transparent;color:var(--ink)"></div>
         </div>
         <textarea class="answer" id="answer" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></textarea>
       </div>
@@ -567,8 +570,9 @@
         ${p.tasks.length ? `<ul>${p.tasks.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
         <p>Write as much as you can and in complete sentences.</p>
       </div>`;
-      $('pane-right-top').innerHTML = '';
+      $('pane-right-top').innerHTML = '<p class="resp-label">Your Response</p>';
       $('email-fields').classList.remove('hidden');
+      $('exam').classList.add('email');
       $('ef-to').textContent = p.to; $('ef-subject').textContent = p.subject;
       $('ef-subject-in').value = ''; $('ef-subject-in').readOnly = false;
       $('ef-subject-in').classList.toggle('hidden', !!p.subject);
@@ -585,6 +589,7 @@
         ${student(p.s1name, p.s1post, AVATAR[0])}
         ${student(p.s2name, p.s2post, AVATAR[1])}`;
       $('email-fields').classList.add('hidden');
+      $('exam').classList.remove('email');
     }
   }
   const fmtMin = (m) => m === 1 ? '1 minute' : (Number.isInteger(m) ? `${m} minutes` : `${Math.floor(m)} minutes ${Math.round((m % 1) * 60)} seconds`);
