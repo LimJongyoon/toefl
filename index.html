@@ -162,6 +162,16 @@
   <h1>TOEFL Writing 연습</h1>
   <p class="sub">문제를 넣고 시작하면 실제 시험 화면처럼 타이머가 바로 시작됩니다. 단어 수는 실제 시험과 같이 공백 기준으로 셉니다.</p>
 
+  <div class="block" style="margin:0 0 20px">
+    <h2>문제 통째로 붙여넣기</h2>
+    <textarea class="field" id="raw" style="min-height:150px" placeholder="문제 전체를 그대로 붙여넣으세요. Email인지 Discussion인지 자동으로 알아내서 아래 칸을 채웁니다."></textarea>
+    <div class="actions" style="margin-top:12px;align-items:center">
+      <button class="btn primary" id="raw-start">인식하고 바로 시작</button>
+      <button class="btn" id="raw-fill">인식해서 칸 채우기</button>
+      <span id="raw-msg" style="font-size:14px;color:var(--muted)"></span>
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab active" data-tab="email">Write an Email (7분)</button>
     <button class="tab" data-tab="discussion">Academic Discussion (10분)</button>
@@ -261,7 +271,7 @@
         </div>
         <div id="email-fields" class="email-fields hidden">
           <div><span>To:</span> <b id="ef-to"></b></div>
-          <div><span>Subject:</span> <b id="ef-subject"></b></div>
+          <div><span>Subject:</span> <b id="ef-subject"></b><input type="text" id="ef-subject-in" class="hidden" spellcheck="false" autocomplete="off" style="border:none;outline:none;font:inherit;width:calc(100% - 72px);background:transparent;color:var(--ink)"></div>
         </div>
         <textarea class="answer" id="answer" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></textarea>
       </div>
@@ -352,7 +362,7 @@
       minutes: parseFloat(v('d-time')) || 10,
     };
   };
-  const fillForm = (p) => {
+  const fillForm = (p, noScroll) => {
     if (p.type === 'email') {
       $('e-scenario').value = p.scenario; $('e-instruction').value = p.instruction;
       $('e-tasks').value = p.tasks.join('\n'); $('e-to').value = p.to; $('e-subject').value = p.subject;
@@ -363,7 +373,7 @@
       $('d-s2name').value = p.s2name; $('d-s2post').value = p.s2post; $('d-time').value = p.minutes;
     }
     document.querySelector(`.tab[data-tab="${p.type}"]`).click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!noScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const titleOf = (p) => p.type === 'email'
     ? (p.subject || p.scenario.slice(0, 60) || '(제목 없음)')
@@ -381,6 +391,92 @@
     renderLists();
   });
   document.querySelectorAll('[data-start]').forEach(b => b.onclick = () => startExam(readForm(b.dataset.start)));
+
+  // ---------- 통째로 붙여넣기 인식 ----------
+  const BULLET = /^\s*(?:[•●▪◦·∙\-*–—]|\d{1,2}[.)])\s+/;
+  function parseProblem(raw, fallbackType) {
+    const lines = raw.replace(/\r/g, '').replace(/ /g, ' ').split('\n').map(s => s.trim());
+    const isEmail = /in your email|write an email to|^\s*(to|subject)\s*:/im.test(raw);
+    const isDisc = /professor|teaching a class|academic discussion|your response/i.test(raw);
+    const type = isEmail && !/teaching a class/i.test(raw) ? 'email' : isDisc ? 'discussion' : fallbackType;
+    return type === 'email' ? parseEmail(lines) : parseDiscussion(lines, raw);
+  }
+  const joinPara = (ls) => ls.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+
+  function parseEmail(lines) {
+    const DROP = /you will read some information|you will have \d+(\.\d+)? minutes?|write as much as you can|^directions?:?$|^write an email$|^question \d+( of \d+)?$|^task \d|^email$/i;
+    let to = '', subject = '', instr = [], tasks = [], scen = [], after = false;
+    for (let l of lines) {
+      let m;
+      if ((m = l.match(/^to\s*:\s*(.*)$/i))) { to = m[1]; continue; }
+      if ((m = l.match(/^subject\s*:\s*(.*)$/i))) { subject = m[1]; continue; }
+      l = l.replace(/^directions?\s*:\s*/i, '').replace(/^(situation|scenario|context|background)\s*:\s*/i, '');
+      if (DROP.test(l) || /^(situation|scenario|context|background)$/i.test(l)) continue;
+      if (/^write an email to|^in your email/i.test(l)) { instr.push(l); after = true; continue; }
+      if (after) { if (l) tasks.push(l.replace(BULLET, '')); }
+      else if (BULLET.test(l)) tasks.push(l.replace(BULLET, ''));
+      else scen.push(l);
+    }
+    const instruction = instr.join(' ');
+    if (!to) {
+      const m = instruction.match(/write an email to\s+((?:(?:Dr|Mr|Ms|Mrs|Prof)\.\s*)?[^.,]+)/i);
+      if (m && /^[A-Z]/.test(m[1])) to = m[1];
+    }
+    return { type: 'email', scenario: joinPara(scen), instruction, tasks, to, subject, minutes: parseFloat($('e-time').value) || 7 };
+  }
+
+  function parseDiscussion(lines, raw) {
+    const cm = raw.match(/teaching a class on\s+([^.\n]+)/i);
+    const DROP = /teaching a class on|write a post responding|in your response,? you should|express and support your opinion|make a contribution to the discussion|an effective response will|you will have \d+ minutes|^directions?:?$|^(write for an )?academic discussion$|^your response:?$|^question \d+( of \d+)?$|^task \d/i;
+    const segs = [];
+    let cur = null;
+    const isName = (s) => s.length <= 40 && s.split(/\s+/).length <= 5 && /^[A-Z]/.test(s) && !/[?!]$/.test(s) && !/[a-z]\.$/.test(s.replace(/^(Dr|Mr|Ms|Mrs|Prof)\.$/, ''));
+    const cleanName = (n) => {
+      n = n.replace(/:$/, '').trim();
+      const p = n.match(/\(([^)]+)\)/); if (p) return p[1].trim();
+      return n.replace(/^(student\s*\d+|professor)\s*[-–:]\s*/i, '').trim() || n;
+    };
+    for (let l of lines) {
+      l = l.replace(/^directions?\s*:\s*/i, '');
+      if (!l) { if (cur) cur.lines.push(''); continue; }
+      if (DROP.test(l)) continue;
+      let m = l.match(/^([A-Z][\w.'’ ()-]{0,38}?)\s*:\s+(.+)$/);
+      if (m && m[1].split(/\s+/).length <= 5) { cur = { name: cleanName(m[1]), lines: [m[2]] }; segs.push(cur); continue; }
+      if (isName(l)) { cur = { name: cleanName(l), lines: [] }; segs.push(cur); continue; }
+      if (!cur) { cur = { name: '', lines: [] }; segs.push(cur); }
+      cur.lines.push(l);
+    }
+    let parts = segs.map(s => ({ name: s.name, text: joinPara(s.lines) })).filter(s => s.text);
+    // 이름을 하나도 못 찾았으면 문단 단위로 나눔
+    if (parts.length < 3 && parts.length && parts.every(p => !p.name)) {
+      const paras = parts.map(p => p.text).join('\n\n').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+      parts = paras.map(t => ({ name: '', text: t }));
+    }
+    // 앞쪽은 교수, 마지막 두 개는 학생
+    while (parts.length > 3) { const [a, b] = parts.splice(0, 2); parts.unshift({ name: a.name, text: a.text + '\n\n' + b.text }); }
+    const [prof = {}, s1 = {}, s2 = {}] = parts;
+    return {
+      type: 'discussion', course: cm ? cm[1].trim() : '',
+      prof: prof.name || 'Professor', question: prof.text || '',
+      s1name: s1.name || 'Student 1', s1post: s1.text || '',
+      s2name: s2.name || 'Student 2', s2post: s2.text || '',
+      minutes: parseFloat($('d-time').value) || 10,
+    };
+  }
+
+  function fromRaw() {
+    const raw = $('raw').value;
+    if (!raw.trim()) { $('raw-msg').textContent = '붙여넣은 내용이 없습니다.'; return null; }
+    const p = parseProblem(raw, curTab);
+    fillForm(p, true);
+    $('raw-msg').textContent = p.type === 'email'
+      ? `Email로 인식 · 할 일 ${p.tasks.length}개${p.to ? '' : ' · To 없음'}${p.subject ? '' : ' · Subject 없음'}`
+      : `Discussion으로 인식 · 교수 ${p.prof} · 학생 ${p.s1name}, ${p.s2name}`;
+    return p;
+  }
+  $('raw-fill').onclick = fromRaw;
+  $('raw-start').onclick = () => { const p = fromRaw(); if (p) startExam(p); };
+  window.__parseProblem = parseProblem;
 
   // ---------- 목록 ----------
   function renderLists() {
@@ -442,6 +538,8 @@
       $('pane-right-top').innerHTML = '';
       $('email-fields').classList.remove('hidden');
       $('ef-to').textContent = p.to; $('ef-subject').textContent = p.subject;
+      $('ef-subject-in').value = ''; $('ef-subject-in').readOnly = false;
+      $('ef-subject-in').classList.toggle('hidden', !!p.subject);
     } else {
       $('task-name').textContent = 'Write for an Academic Discussion';
       $('pane-left').innerHTML = `<div class="directions">
@@ -561,7 +659,10 @@
     finished = true;
     clearInterval(tick);
     ans.readOnly = true;
+    $('ef-subject-in').readOnly = true;
     $('modal').classList.add('hidden');
+    if (problem.type === 'email' && !problem.subject && $('ef-subject-in').value.trim())
+      problem = { ...problem, subject: $('ef-subject-in').value.trim() };
     const used = Math.min((Date.now() - startedAt) / 1000, problem.minutes * 60);
     const rec = { at: Date.now(), problem, answer: ans.value, words: countWords(ans.value), used, timeUp };
     const hist = store.get('tw_history', []);
