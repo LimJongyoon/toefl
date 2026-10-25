@@ -358,6 +358,15 @@
 
   const show = (id) => ['setup', 'exam', 'result'].forEach(x => $(x).classList.toggle('hidden', x !== id));
 
+  // 시험 화면은 1440×800 기준으로 디자인. 더 큰 화면(1920×1080 등)에서는 통째로 키워서 같은 비율로 딱 맞게.
+  const fitExam = () => {
+    const z = Math.min(1.6, Math.max(1, Math.min(innerWidth / 1440, innerHeight / 800)));
+    $('exam').style.zoom = z;
+    $('exam').style.height = z === 1 ? '' : (innerHeight / z) + 'px';
+  };
+  addEventListener('resize', fitExam);
+  fitExam();
+
   // ---------- 탭 ----------
   let curTab = 'email';
   document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
