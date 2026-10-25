@@ -14,18 +14,18 @@
     --ink: #1d2433;
     --muted: #5d6677;
     --line: #d5d9e0;
-    --head: #20304a;
+    --head: #2c6b70;
     --head-ink: #ffffff;
-    --accent: #1f5fae;
+    --accent: #2c6b70;
     --accent-ink: #ffffff;
-    --soft: #eef3fa;
+    --soft: #eaf3f3;
     --danger: #b3261e;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
     background: var(--bg); color: var(--ink);
-    font: 16px/1.55 Arial, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font: 16px/1.55 "Open Sans", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   }
   button { font: inherit; cursor: pointer; }
   .hidden { display: none !important; }
@@ -41,16 +41,39 @@
   .btn.danger { color: var(--danger); }
 
   /* ---------- 설정 화면 ---------- */
-  .setup { max-width: 920px; margin: 0 auto; padding: 24px 16px 60px; }
-  .setup h1 { font-size: 24px; margin: 8px 0 4px; }
-  .setup .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .setup-head {
+    background: var(--head); color: #fff; height: 53px; display: flex; align-items: center;
+    padding: 0 22px; font-size: 22px; font-style: italic; font-weight: 600;
+  }
+  .setup { max-width: 760px; margin: 0 auto; padding: 28px 16px 60px; }
+  .hero { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .hero h1 { font-size: 20px; font-weight: 600; margin: 0 0 12px; }
+  .hero textarea.field { min-height: 240px; border-radius: 8px; font-size: 15px; line-height: 1.55; padding: 12px 14px; }
+  .hero .go { display: flex; align-items: center; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
+  .hero .go .btn.primary { padding: 10px 34px; font-size: 16px; font-weight: 600; border-radius: 8px; }
+  .msg { font-size: 14px; color: var(--muted); margin: 10px 0 0; min-height: 1em; }
+  .msg:empty { display: none; }
+  .textbtn { background: none; border: none; padding: 0; color: var(--accent); font-size: 14px; font-weight: 600; }
+  .textbtn:hover { text-decoration: underline; }
+  .textbtn.danger { color: var(--danger); }
+  details.manual { margin-top: 16px; }
+  details.manual > summary { list-style: none; cursor: pointer; color: var(--accent); font-weight: 600; font-size: 15px; padding: 6px 2px; }
+  details.manual > summary::-webkit-details-marker { display: none; }
+  details.manual > summary::before { content: "▸ "; }
+  details.manual[open] > summary::before { content: "▾ "; }
+  details.manual > .tabs { margin-top: 10px; }
+  .lists { margin-top: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 6px 20px 10px; }
+  .ltabs { display: flex; gap: 18px; border-bottom: 1px solid var(--line); margin: 0 -20px 4px; padding: 0 20px; }
+  .ltab { background: none; border: none; border-bottom: 3px solid transparent; padding: 10px 0 8px; font-size: 15px; color: var(--muted); }
+  .ltab.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+  .ltab .n { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   .tabs { display: flex; gap: 6px; margin-bottom: 0; flex-wrap: wrap; }
   .tab {
     border: 1px solid var(--line); border-bottom: none; background: #e6e9ee;
     padding: 9px 16px; border-radius: 6px 6px 0 0; font-size: 15px;
   }
   .tab.active { background: var(--panel); font-weight: bold; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 0 6px 6px 6px; padding: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 0 10px 10px 10px; padding: 20px; }
   .card + .card, .block { margin-top: 20px; }
   .block { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 20px; }
   .block h2 { font-size: 17px; margin: 0 0 12px; }
@@ -72,7 +95,9 @@
   }
   .list li:first-child { border-top: none; }
   .list .meta { color: var(--muted); font-size: 13px; }
-  .list .t { font-size: 15px; overflow-wrap: anywhere; }
+  .list .t { font-size: 15px; overflow-wrap: anywhere; flex: 1; min-width: 200px; }
+  .list .acts { display: flex; align-items: center; gap: 14px; }
+  .list .acts .btn { padding: 5px 16px; }
   .empty { color: var(--muted); font-size: 14px; }
   .pill { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 10px; background: var(--soft); color: var(--accent); margin-right: 6px; font-weight: bold; }
 
@@ -186,87 +211,88 @@
 <body>
 
 <!-- ===================== 설정 화면 ===================== -->
+<div id="setup-wrap">
+<div class="setup-head">Writing Practice</div>
 <div id="setup" class="setup">
-  <h1>TOEFL Writing 연습</h1>
-  <p class="sub">문제를 넣고 시작하면 실제 시험 화면처럼 타이머가 바로 시작됩니다. 단어 수는 실제 시험과 같이 공백 기준으로 셉니다.</p>
-
-  <div class="block" style="margin:0 0 20px">
-    <h2>문제 통째로 붙여넣기</h2>
-    <textarea class="field" id="raw" style="min-height:150px" placeholder="문제 전체를 그대로 붙여넣으세요. Email인지 Discussion인지 자동으로 알아내서 아래 칸을 채웁니다."></textarea>
-    <div class="actions" style="margin-top:12px;align-items:center">
-      <button class="btn primary" id="raw-start">인식하고 바로 시작</button>
-      <button class="btn" id="raw-fill">인식해서 칸 채우기</button>
-      <span id="raw-msg" style="font-size:14px;color:var(--muted)"></span>
+  <div class="hero">
+    <h1>문제 붙여넣기</h1>
+    <textarea class="field" id="raw" placeholder="문제 전체를 그대로 붙여넣으세요. Email / Discussion은 자동으로 알아냅니다."></textarea>
+    <div class="go">
+      <button class="btn primary" id="raw-start">시작</button>
     </div>
+    <p class="msg" id="raw-msg"></p>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="email">Write an Email (7분)</button>
-    <button class="tab" data-tab="discussion">Academic Discussion (10분)</button>
-  </div>
-
-  <!-- 이메일 -->
-  <div class="card" id="form-email">
-    <label>상황 설명 <span class="hint">(시험에 나오는 시나리오 문단)</span></label>
-    <textarea class="field" id="e-scenario" placeholder="You recently attended a workshop organized by your city's community center..."></textarea>
-
-    <label>지시문 <span class="hint">(예: Write an email to Ms. Lee. In your email, do the following:)</span></label>
-    <input type="text" id="e-instruction" placeholder="Write an email to the director of the community center. In your email, do the following:">
-
-    <label>해야 할 일 3개 <span class="hint">(한 줄에 하나씩)</span></label>
-    <textarea class="field" id="e-tasks" placeholder="Thank the director for organizing the workshop.&#10;Describe something you learned.&#10;Suggest a topic for a future workshop."></textarea>
-
-    <div class="row3">
-      <div><label>To</label><input type="text" id="e-to" placeholder="Ms. Lee"></div>
-      <div><label>Subject</label><input type="text" id="e-subject" placeholder="Workshop feedback"></div>
-      <div><label>시간(분)</label><input type="number" id="e-time" value="7" min="1" max="60" step="0.5"></div>
+  <details class="manual" id="manual">
+    <summary>직접 입력 · 인식 결과 수정</summary>
+    <div class="tabs">
+      <button class="tab active" data-tab="email">Write an Email (7분)</button>
+      <button class="tab" data-tab="discussion">Academic Discussion (10분)</button>
     </div>
 
-    <div class="actions">
-      <button class="btn primary" data-start="email">시험 시작</button>
-      <button class="btn" data-save="email">문제 저장</button>
-      <button class="btn" data-clear="email">비우기</button>
-    </div>
-  </div>
+    <!-- 이메일 -->
+    <div class="card" id="form-email">
+      <label>상황 설명 <span class="hint">(시험에 나오는 시나리오 문단)</span></label>
+      <textarea class="field" id="e-scenario" placeholder="You recently attended a workshop organized by your city's community center..."></textarea>
 
-  <!-- 디스커션 -->
-  <div class="card hidden" id="form-discussion">
-    <div class="row">
-      <div><label>수업 주제 <span class="hint">(Your professor is teaching a class on ___)</span></label><input type="text" id="d-course" placeholder="sociology"></div>
-      <div><label>교수 이름</label><input type="text" id="d-prof" placeholder="Dr. Diaz"></div>
-    </div>
-    <label>교수 질문</label>
-    <textarea class="field" id="d-question" placeholder="Over the past few decades, ..."></textarea>
+      <label>지시문 <span class="hint">(예: Write an email to Ms. Lee. In your email, do the following:)</span></label>
+      <input type="text" id="e-instruction" placeholder="Write an email to the director of the community center. In your email, do the following:">
 
-    <div class="row">
-      <div><label>학생 1 이름</label><input type="text" id="d-s1name" placeholder="Claire"></div>
-      <div><label>학생 2 이름</label><input type="text" id="d-s2name" placeholder="Paul"></div>
-    </div>
-    <div class="row">
-      <div><label>학생 1 의견</label><textarea class="field" id="d-s1post"></textarea></div>
-      <div><label>학생 2 의견</label><textarea class="field" id="d-s2post"></textarea></div>
-    </div>
-    <div class="row3">
-      <div></div><div></div>
-      <div><label>시간(분)</label><input type="number" id="d-time" value="10" min="1" max="60" step="0.5"></div>
+      <label>해야 할 일 3개 <span class="hint">(한 줄에 하나씩)</span></label>
+      <textarea class="field" id="e-tasks" placeholder="Thank the director for organizing the workshop.&#10;Describe something you learned.&#10;Suggest a topic for a future workshop."></textarea>
+
+      <div class="row3">
+        <div><label>To</label><input type="text" id="e-to" placeholder="Ms. Lee"></div>
+        <div><label>Subject</label><input type="text" id="e-subject" placeholder="Workshop feedback"></div>
+        <div><label>시간(분)</label><input type="number" id="e-time" value="7" min="1" max="60" step="0.5"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" data-start="email">시험 시작</button>
+        <button class="btn" data-save="email">문제 저장</button>
+        <button class="btn" data-clear="email">비우기</button>
+      </div>
     </div>
 
-    <div class="actions">
-      <button class="btn primary" data-start="discussion">시험 시작</button>
-      <button class="btn" data-save="discussion">문제 저장</button>
-      <button class="btn" data-clear="discussion">비우기</button>
-    </div>
-  </div>
+    <!-- 디스커션 -->
+    <div class="card hidden" id="form-discussion">
+      <div class="row">
+        <div><label>수업 주제 <span class="hint">(Your professor is teaching a class on ___)</span></label><input type="text" id="d-course" placeholder="sociology"></div>
+        <div><label>교수 이름</label><input type="text" id="d-prof" placeholder="Dr. Diaz"></div>
+      </div>
+      <label>교수 질문</label>
+      <textarea class="field" id="d-question" placeholder="Over the past few decades, ..."></textarea>
 
-  <div class="block">
-    <h2>저장한 문제</h2>
+      <div class="row">
+        <div><label>학생 1 이름</label><input type="text" id="d-s1name" placeholder="Claire"></div>
+        <div><label>학생 2 이름</label><input type="text" id="d-s2name" placeholder="Paul"></div>
+      </div>
+      <div class="row">
+        <div><label>학생 1 의견</label><textarea class="field" id="d-s1post"></textarea></div>
+        <div><label>학생 2 의견</label><textarea class="field" id="d-s2post"></textarea></div>
+      </div>
+      <div class="row3">
+        <div></div><div></div>
+        <div><label>시간(분)</label><input type="number" id="d-time" value="10" min="1" max="60" step="0.5"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" data-start="discussion">시험 시작</button>
+        <button class="btn" data-save="discussion">문제 저장</button>
+        <button class="btn" data-clear="discussion">비우기</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="lists hidden" id="lists">
+    <div class="ltabs">
+      <button class="ltab active" data-ltab="saved">저장한 문제<span class="n" id="n-saved"></span></button>
+      <button class="ltab" data-ltab="history">내 기록<span class="n" id="n-history"></span></button>
+    </div>
     <ul class="list" id="saved-list"></ul>
+    <ul class="list hidden" id="history-list"></ul>
   </div>
-
-  <div class="block">
-    <h2>내 답안 기록</h2>
-    <ul class="list" id="history-list"></ul>
-  </div>
+</div>
 </div>
 
 <!-- ===================== 시험 화면 ===================== -->
@@ -359,7 +385,7 @@
   const fmtShort = (sec) => { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); };
   const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const show = (id) => ['setup', 'exam', 'result'].forEach(x => $(x).classList.toggle('hidden', x !== id));
+  const show = (id) => ['setup', 'exam', 'result'].forEach(x => $(x === 'setup' ? 'setup-wrap' : x).classList.toggle('hidden', x !== id));
 
   // 시험 화면은 1400×788 기준으로 디자인 → 실제 시험 환경인 1920×1080에서 약 1.37배로 실제 화면과 같은 비율.
   const fitExam = () => {
@@ -409,11 +435,11 @@
       $('d-s2name').value = p.s2name; $('d-s2post').value = p.s2post; $('d-time').value = p.minutes;
     }
     document.querySelector(`.tab[data-tab="${p.type}"]`).click();
-    if (!noScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!noScroll) { $('manual').open = true; $('manual').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   };
   const titleOf = (p) => p.type === 'email'
     ? (p.subject || p.scenario.slice(0, 60) || '(제목 없음)')
-    : (p.question.slice(0, 70) || '(질문 없음)');
+    : (p.question.length > 70 ? p.question.slice(0, 70) + '…' : p.question || '(질문 없음)');
   const typeLabel = (t) => t === 'email' ? 'Email' : 'Discussion';
 
   document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => {
@@ -504,13 +530,19 @@
     const raw = $('raw').value;
     if (!raw.trim()) { $('raw-msg').textContent = '붙여넣은 내용이 없습니다.'; return null; }
     const p = parseProblem(raw, curTab);
+    filledRaw = raw;
     fillForm(p, true);
     $('raw-msg').textContent = p.type === 'email'
       ? `Email로 인식 · 할 일 ${p.tasks.length}개${p.to ? '' : ' · To 없음'}${p.subject ? '' : ' · Subject 없음'}`
       : `Discussion으로 인식 · 교수 ${p.prof} · 학생 ${p.s1name}, ${p.s2name}`;
     return p;
   }
-  $('raw-fill').onclick = fromRaw;
+  // 직접 입력을 펼칠 때, 새로 붙여넣은 내용이 있으면 그걸로 칸을 채워서 보여줌
+  let filledRaw = '';
+  $('manual').addEventListener('toggle', () => {
+    const raw = $('raw').value;
+    if ($('manual').open && raw.trim() && raw !== filledRaw) fromRaw();
+  });
   $('raw-start').onclick = () => { const p = fromRaw(); if (p) startExam(p); };
   window.__parseProblem = parseProblem;
 
@@ -519,21 +551,30 @@
     const saved = store.get('tw_saved', []);
     $('saved-list').innerHTML = saved.length ? saved.map(p => `
       <li><div class="t"><span class="pill">${typeLabel(p.type)}</span>${esc(titleOf(p))}</div>
-      <div class="actions" style="margin:0">
+      <div class="acts">
+        <button class="textbtn" data-act="load" data-id="${p.id}">불러오기</button>
+        <button class="textbtn danger" data-act="del" data-id="${p.id}">삭제</button>
         <button class="btn primary" data-act="start" data-id="${p.id}">시작</button>
-        <button class="btn" data-act="load" data-id="${p.id}">불러오기</button>
-        <button class="btn danger" data-act="del" data-id="${p.id}">삭제</button>
       </div></li>`).join('') : '<li class="empty">저장한 문제가 없습니다.</li>';
 
     const hist = store.get('tw_history', []);
     $('history-list').innerHTML = hist.length ? hist.map(h => `
       <li><div><div class="t"><span class="pill">${typeLabel(h.problem.type)}</span>${esc(titleOf(h.problem))}</div>
       <div class="meta">${new Date(h.at).toLocaleString()} · ${h.words}단어 · ${fmtShort(h.used)}</div></div>
-      <div class="actions" style="margin:0">
+      <div class="acts">
+        <button class="textbtn danger" data-act="hdel" data-id="${h.at}">삭제</button>
         <button class="btn" data-act="view" data-id="${h.at}">보기</button>
-        <button class="btn danger" data-act="hdel" data-id="${h.at}">삭제</button>
       </div></li>`).join('') : '<li class="empty">아직 기록이 없습니다.</li>';
+
+    $('n-saved').textContent = saved.length || '';
+    $('n-history').textContent = hist.length || '';
+    $('lists').classList.toggle('hidden', !saved.length && !hist.length);
   }
+  document.querySelectorAll('.ltab').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.ltab').forEach(x => x.classList.toggle('active', x === t));
+    $('saved-list').classList.toggle('hidden', t.dataset.ltab !== 'saved');
+    $('history-list').classList.toggle('hidden', t.dataset.ltab !== 'history');
+  });
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-act]'); if (!b) return;
     const id = Number(b.dataset.id);
