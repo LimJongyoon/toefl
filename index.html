@@ -490,7 +490,7 @@
   <div id="sr-list"></div>
   <p class="msg" id="sr-note"></p>
   <div class="actions">
-    <button class="btn primary hidden" id="sr-zip">녹음 전체 다운로드 (.zip)</button>
+    <button class="btn primary hidden" id="sr-audio">녹음 전체 다운로드 (.mp3)</button>
     <button class="btn" id="sr-copy">문제+받아쓰기 복사</button>
     <button class="btn" id="sr-retry">같은 문제 다시</button>
     <button class="btn" id="sr-home">처음으로</button>
@@ -1205,7 +1205,7 @@
       ${rec.correct[i] ? '' : `<div class="tr">정답: ${esc(buildText(it))}</div>`}
     </div>`).join('');
     $('sr-note').textContent = '';
-    $('sr-zip').classList.add('hidden');
+    $('sr-audio').classList.add('hidden');
     show('sresult');
     window.scrollTo(0, 0);
   }
@@ -1529,7 +1529,7 @@
     if (!urls.some(Boolean)) notes.push('녹음은 이 페이지를 닫기 전까지만 다시 들을 수 있어요.');
     if (rec.answers.every(a => a == null)) notes.push('받아쓰기는 브라우저 음성 인식을 씁니다 (Chrome·Safari, http(s) 주소에서만 동작).');
     $('sr-note').textContent = notes.join(' ');
-    $('sr-zip').classList.toggle('hidden', !urls.some(Boolean));
+    $('sr-audio').classList.toggle('hidden', !urls.some(Boolean));
     show('sresult');
     window.scrollTo(0, 0);
   }
@@ -1542,75 +1542,62 @@
       `${i + 1}. ${it.ctx ? it.ctx + '\n   ' : ''}내 답: ${buildText(it, curSRec.answers[i])}${curSRec.correct[i] ? ' (정답)' : `\n   정답: ${buildText(it)}`}`).join('\n\n'), e.target);
     copy(speakingText(curSRec), e.target);
   };
-  const speakingText = (rec, files) => `[${rec.problem.type === 'repeat' ? 'Listen and Repeat' : 'Take an Interview'}]\n\n`
-    + rec.problem.items.map((q, i) => `${i + 1}. ${files && files[i] ? `[${files[i]}] ` : ''}${q}\n   → ${rec.answers[i] ?? '(받아쓰기 없음)'}`).join('\n\n');
+  const speakingText = (rec) => `[${rec.problem.type === 'repeat' ? 'Listen and Repeat' : 'Take an Interview'}]\n\n`
+    + rec.problem.items.map((q, i) => `${i + 1}. ${q}\n   → ${rec.answers[i] ?? '(받아쓰기 없음)'}`).join('\n\n');
 
-  // ---------- 녹음 한 번에 받기: 문항별 WAV + 문제/받아쓰기 txt 를 zip 하나로 ----------
-  // 어디서나 재생되도록 16kHz 모노 WAV로 바꿈 (실패하면 원래 녹음 파일 그대로)
-  async function toWav(blob) {
+  // ---------- 녹음 한 번에 받기: 모든 답을 순서대로 이어붙인 MP3 하나 (답 사이 2초 공백) ----------
+  const REC_RATE = 22050, GAP_SECS = 2;
+  // 녹음 하나를 22kHz 모노 PCM으로
+  async function decodeMono(blob) {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     try {
       const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
-      const rate = 16000, off = new OfflineAudioContext(1, Math.max(1, Math.ceil(buf.duration * rate)), rate);
+      const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(buf.duration * REC_RATE)), REC_RATE);
       const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start();
-      const pcm = (await off.startRendering()).getChannelData(0);
-      const v = new DataView(new ArrayBuffer(44 + pcm.length * 2));
-      const str = (o, s) => [...s].forEach((c, k) => v.setUint8(o + k, c.charCodeAt(0)));
-      str(0, 'RIFF'); v.setUint32(4, 36 + pcm.length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
-      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true);
-      v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-      str(36, 'data'); v.setUint32(40, pcm.length * 2, true);
-      pcm.forEach((x, k) => v.setInt16(44 + k * 2, Math.max(-1, Math.min(1, x)) * 0x7fff, true));
-      return new Uint8Array(v.buffer);
+      return (await off.startRendering()).getChannelData(0);
     } finally { ctx.close().catch(() => {}); }
   }
-  const CRC = new Uint32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c; });
-  const crc32 = (b) => { let c = ~0; for (let k = 0; k < b.length; k++) c = CRC[(c ^ b[k]) & 255] ^ (c >>> 8); return ~c >>> 0; };
-  // 압축 없는(store) zip
-  function makeZip(files) {
-    const enc = new TextEncoder(), d = new Date(), out = [], dir = [];
-    const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
-    const date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
-    let off = 0;
-    for (const f of files) {
-      const name = enc.encode(f.name), n = f.data.length, crc = crc32(f.data);
-      const h = new DataView(new ArrayBuffer(30));
-      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
-      h.setUint16(10, time, true); h.setUint16(12, date, true); h.setUint32(14, crc, true);
-      h.setUint32(18, n, true); h.setUint32(22, n, true); h.setUint16(26, name.length, true);
-      out.push(h, name, f.data);
-      const c = new DataView(new ArrayBuffer(46));
-      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
-      c.setUint16(12, time, true); c.setUint16(14, date, true); c.setUint32(16, crc, true);
-      c.setUint32(20, n, true); c.setUint32(24, n, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
-      dir.push(c, name);
-      off += 30 + name.length + n;
-    }
-    const size = dir.reduce((s, x) => s + x.byteLength, 0), e = new DataView(new ArrayBuffer(22));
-    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
-    e.setUint32(12, size, true); e.setUint32(16, off, true);
-    return new Blob([...out, ...dir, e], { type: 'application/zip' });
+  const toInt16 = (pcm) => Int16Array.from(pcm, x => Math.max(-1, Math.min(1, x)) * 0x7fff);
+  const loadLame = () => window.lamejs ? Promise.resolve() : new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  function toMp3(pcm) {
+    const enc = new lamejs.Mp3Encoder(1, REC_RATE, 48), out = [];
+    for (let k = 0; k < pcm.length; k += 1152) { const b = enc.encodeBuffer(pcm.subarray(k, k + 1152)); if (b.length) out.push(b); }
+    out.push(enc.flush());
+    return new Blob(out, { type: 'audio/mpeg' });
   }
-  $('sr-zip').onclick = async (e) => {
-    const btn = e.target, rec = curSRec, urls = audioCache[rec.at] || [];
+  // MP3 인코더를 못 불러오면 WAV로
+  function toWavBlob(pcm) {
+    const rate = REC_RATE, v = new DataView(new ArrayBuffer(44));
+    const str = (o, s) => [...s].forEach((c, k) => v.setUint8(o + k, c.charCodeAt(0)));
+    str(0, 'RIFF'); v.setUint32(4, 36 + pcm.length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true);
+    v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    str(36, 'data'); v.setUint32(40, pcm.length * 2, true);
+    return new Blob([v, pcm], { type: 'audio/wav' });
+  }
+  $('sr-audio').onclick = async (e) => {
+    const btn = e.target, rec = curSRec, urls = (audioCache[rec.at] || []).filter(Boolean);
     const label = btn.textContent; btn.textContent = '만드는 중…'; btn.disabled = true;
     try {
-      const files = [], names = [];
-      for (let i = 0; i < urls.length; i++) {
-        if (!urls[i]) continue;
-        const blob = await (await fetch(urls[i])).blob(), num = String(i + 1).padStart(2, '0');
-        try { files.push({ name: names[i] = `${num}.wav`, data: await toWav(blob) }); }
-        catch {
-          const ext = /mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
-          files.push({ name: names[i] = `${num}.${ext}`, data: new Uint8Array(await blob.arrayBuffer()) });
-        }
-      }
-      files.unshift({ name: 'questions.txt', data: new TextEncoder().encode(speakingText(rec, names)) });
+      const parts = [];
+      for (const u of urls) parts.push(await decodeMono(await (await fetch(u)).blob()));
+      const gap = REC_RATE * GAP_SECS, all = new Float32Array(parts.reduce((n, p) => n + p.length + gap, 0));
+      let at = 0;
+      for (const p of parts) { all.set(p, at); at += p.length + gap; }
+      const pcm = toInt16(all);
+      let blob, ext = 'mp3';
+      try { await loadLame(); blob = toMp3(pcm); } catch { blob = toWavBlob(pcm); ext = 'wav'; }
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(makeZip(files));
-      a.download = `toefl-${rec.problem.type}-${new Date(rec.at).toISOString().slice(0, 16).replace(/[:T]/g, '-')}.zip`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `toefl-${rec.problem.type}-${new Date(rec.at).toISOString().slice(0, 16).replace(/[:T]/g, '-')}.${ext}`;
       a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    } finally { btn.textContent = label; btn.disabled = false; }
+    } catch { alert('녹음을 합치지 못했습니다.'); }
+    finally { btn.textContent = label; btn.disabled = false; }
   };
   $('sr-retry').onclick = () => curSRec.problem.type === 'build' ? startBuild(curSRec.problem) : startSpeaking(curSRec.problem);
   $('sr-home').onclick = () => { if (hasTTS) speechSynthesis.cancel(); show('setup'); };
