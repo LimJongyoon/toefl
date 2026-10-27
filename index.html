@@ -255,18 +255,22 @@
 
   /* ---------- 단어 배열 (Build a Sentence) ---------- */
   .bstage { flex: 1; min-height: 0; overflow: auto; width: 100%; max-width: 1000px; margin: 0 auto; padding: 28px 40px; display: flex; flex-direction: column; gap: 26px; }
-  .bdir { font-size: 18px; font-weight: 600; margin: 0; }
-  .brow { display: flex; gap: 20px; align-items: center; }
-  .brow .avatar { width: 84px; height: 84px; }
-  .bubble { background: #f2f2f2; border-radius: 14px; padding: 14px 18px; font-size: 18px; line-height: 1.5; }
+  .bdir { font-size: 22px; font-weight: 700; margin: 0 0 18px; text-align: center; }
+  .brow { display: flex; gap: 14px; align-items: flex-end; }
+  .brow .avatar { width: 72px; height: 72px; flex: none; }
+  .bubble { font-size: 17px; font-weight: 600; line-height: 1.5; padding-bottom: 4px; }
   .bline { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 8px; font-size: 18px; flex: 1; }
   .bline .end { margin-left: -6px; }
-  .blank { min-width: 90px; height: 40px; border: none; border-bottom: 2px solid #555; background: none; padding: 0 8px; font-size: 18px; color: var(--x-ink); }
-  .blank.filled { background: #eaf3f3; border-radius: 6px 6px 0 0; }
-  .bpool { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding-top: 22px; border-top: 1px solid var(--x-line); }
-  .chip { border: 1px solid #9aa5a6; background: #fff; border-radius: 8px; padding: 8px 16px; font-size: 18px; color: var(--x-ink); }
+  .blank { min-width: 110px; height: 36px; border: 2px solid transparent; border-bottom: 1.5px solid #555; background: none; padding: 0 8px; font-size: 18px; color: var(--x-ink); touch-action: none; user-select: none; }
+  .blank.filled { cursor: grab; }
+  .blank.sel { border: 2px solid #3a6fd8; border-radius: 2px; }
+  .blank.over { background: #eaf3f3; }
+  .bpool { display: flex; flex-wrap: wrap; gap: 10px 14px; justify-content: center; padding: 22px 8px 8px; margin-top: 12px; min-height: 64px; border-radius: 8px; }
+  .bpool.over { background: #f3f7f7; }
+  .chip { border: none; background: none; border-radius: 2px; padding: 4px 10px; font-size: 18px; color: var(--x-ink); cursor: grab; touch-action: none; user-select: none; }
   .chip:hover { background: #eef5f5; }
-  .chip.used { visibility: hidden; }
+  .chip.used { background: #e4e4e4; }
+  .bghost { position: fixed; z-index: 1000; pointer-events: none; padding: 4px 10px; font-size: 18px; background: #fff; border: 1px solid #9aa5a6; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.18); transform: translate(-50%, -60%); }
   @media (max-width: 640px) { .bstage { padding: 20px 16px; } .brow .avatar { width: 56px; height: 56px; } }
 </style>
 </head>
@@ -1136,7 +1140,7 @@
       order = chunks.map((_, k) => k).sort(() => Math.random() - 0.5);
       if (chunks.length < 2 || order.some((k, j) => chunks[k] !== chunks[j])) break;
     }
-    return bx.states[i] = { chunks, order, fill: Array(answer.length).fill(null) };
+    return bx.states[i] = { chunks, order, fill: Array(answer.length).fill(null), sel: null };
   }
   function renderBuild() {
     const { p, i, faces } = bx, it = p.items[i], st = buildState(i);
@@ -1147,20 +1151,72 @@
       const show = (t) => esc(idx === 0 ? cap(t) : t);
       if (x.fixed) return `<span>${show(x.t)}</span>`;
       const b = k++, c = st.fill[b];
-      return `<button class="blank${c != null ? ' filled' : ''}" data-blank="${b}">${c != null ? show(st.chunks[c]) : ''}</button>`;
+      return `<button class="blank${c != null ? ' filled' : ''}${st.sel === b ? ' sel' : ''}" data-blank="${b}">${c != null ? show(st.chunks[c]) : ''}</button>`;
     }).join('') + (it.end ? `<span class="end">${esc(it.end)}</span>` : '');
     $('b-ans').innerHTML = `${face(faces[1])}<div class="bline">${line}</div>`;
     $('b-pool').innerHTML = st.order.map(c =>
       `<button class="chip${st.fill.includes(c) ? ' used' : ''}" data-chip="${c}">${esc(st.chunks[c])}</button>`).join('');
   }
-  // 보기 누르면 첫 빈칸에, 채운 칸 누르면 다시 보기로
+  // 클릭: 빈칸을 고르면(파란 테두리) 그 칸에, 아니면 첫 빈칸에. 채운 칸·회색 보기를 누르면 다시 빼기
+  // 드래그: 보기 → 아무 빈칸(이미 있으면 교체), 빈칸 ↔ 빈칸(맞바꿈), 빈칸 → 보기 영역(빼기)
+  function placeChunk(st, c, t) {
+    const from = st.fill.indexOf(c), prev = st.fill[t];
+    st.fill[t] = c;
+    if (from >= 0 && from !== t) st.fill[from] = prev;
+  }
   $('bexam').addEventListener('click', (e) => {
-    if (!bx || bx.done) return;
+    if (!bx || bx.done || bx.dragged) return;
     const st = bx.states[bx.i], chip = e.target.closest('[data-chip]'), blank = e.target.closest('[data-blank]');
-    if (chip) { const at = st.fill.indexOf(null); if (at < 0) return; st.fill[at] = Number(chip.dataset.chip); }
-    else if (blank) st.fill[Number(blank.dataset.blank)] = null;
-    else return;
+    if (chip) {
+      const c = Number(chip.dataset.chip), at = st.fill.indexOf(c);
+      if (at >= 0) { st.fill[at] = null; st.sel = at; }
+      else {
+        const t = st.sel != null ? st.sel : st.fill.indexOf(null);
+        if (t < 0) return;
+        st.fill[t] = c; st.sel = null;
+      }
+    } else if (blank) {
+      const b = Number(blank.dataset.blank);
+      if (st.fill[b] != null) { st.fill[b] = null; st.sel = b; }
+      else st.sel = st.sel === b ? null : b;
+    } else return;
     renderBuild();
+  });
+  $('bexam').addEventListener('pointerdown', (e) => {
+    if (!bx || bx.done || e.button > 0) return;
+    const st = bx.states[bx.i], chip = e.target.closest('[data-chip]'), blank = e.target.closest('[data-blank]');
+    const c = chip ? Number(chip.dataset.chip) : blank ? st.fill[Number(blank.dataset.blank)] : null;
+    if (c == null) return;
+    const x0 = e.clientX, y0 = e.clientY;
+    let ghost = null, over = null;
+    const target = (ev) => {
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      return el && (el.closest('#bexam [data-blank]') || el.closest('#b-pool'));
+    };
+    const move = (ev) => {
+      if (!ghost) {
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return;
+        ghost = document.createElement('div');
+        ghost.className = 'bghost'; ghost.textContent = st.chunks[c];
+        document.body.appendChild(ghost);
+      }
+      ev.preventDefault();
+      ghost.style.left = ev.clientX + 'px'; ghost.style.top = ev.clientY + 'px';
+      const t = target(ev);
+      if (t !== over) { if (over) over.classList.remove('over'); over = t; if (over) over.classList.add('over'); }
+    };
+    const up = (ev) => {
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      if (!ghost) return;
+      ghost.remove();
+      const t = ev.type === 'pointerup' && target(ev);
+      if (t && t.dataset.blank != null) placeChunk(st, c, Number(t.dataset.blank));
+      else if (t) { const at = st.fill.indexOf(c); if (at >= 0) st.fill[at] = null; }
+      st.sel = null;
+      bx.dragged = true; setTimeout(() => { if (bx) bx.dragged = false; }, 0);
+      renderBuild();
+    };
+    addEventListener('pointermove', move, { passive: false }); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   });
   setToggle($('toggle-btime'), false, 'Timer');
   $('toggle-btime').onclick = () => setToggle($('toggle-btime'), $('b-timer').classList.toggle('hidden'), 'Timer');
@@ -1417,6 +1473,8 @@
       if (!s.skip) await speak(p.items[i], s);
       if (s.stopped) return;
       if (s.skip) continue;
+      // 실제 시험처럼 따라 말하기는 음성이 끝나고 잠깐 뒤에 삐 소리
+      if (p.type === 'repeat') { await pause(s, 1200); if (s.stopped) return; if (s.skip) continue; }
       beep(s.ctx);
       await pause(s, 300);
       if (s.stopped) return;
