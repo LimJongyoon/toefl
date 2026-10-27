@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TOEFL Writing Practice</title>
+<title>TOEFL Practice</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;1,600&display=swap" rel="stylesheet">
@@ -213,25 +213,95 @@
   .modal h3 { margin: 0 0 8px; font-size: 18px; }
   .modal p { margin: 0 0 16px; color: var(--muted); font-size: 15px; }
   .modal .actions { justify-content: flex-end; margin-top: 0; }
+
+  /* ---------- Writing / Speaking 전환 ---------- */
+  .sections { display: flex; gap: 24px; margin: 0 4px 14px; }
+  .sec { background: none; border: none; border-bottom: 3px solid transparent; padding: 2px 0 6px; font-size: 19px; font-weight: 600; color: var(--muted); }
+  .sec.on { color: var(--ink); border-bottom-color: var(--accent); }
+  .sopts { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; margin-top: 12px; }
+  .sopts label { margin: 0 0 4px; font-size: 13px; }
+  .sopts select, .sopts input { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; font: inherit; font-size: 14px; background: #fff; color: var(--ink); }
+  .sopts select#s-voice { max-width: 240px; }
+  .sopts input { width: 80px; }
+
+  /* ---------- 스피킹 시험 화면 ---------- */
+  .stage { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 16px; text-align: center; }
+  .stage .avatar { width: 150px; height: 150px; }
+  .spk { width: 150px; height: 150px; border-radius: 50%; background: #eaf3f3; color: var(--teal); display: grid; place-items: center; }
+  .spk svg { width: 70px; height: 70px; }
+  .stage-dir { font-size: 17px; max-width: 680px; margin: 0; color: #444; line-height: 1.6; }
+  .stage-text { font-size: 20px; max-width: 760px; line-height: 1.55; margin: 0; white-space: pre-wrap; }
+  .stage-status { font-size: 20px; font-weight: 600; color: var(--teal); min-height: 1.5em; }
+  .stage-status.rec { color: #c62828; }
+  .stage-status.rec::before { content: "● "; }
+  .rbox { width: min(440px, 100%); }
+  .rbox .rt { display: flex; justify-content: space-between; font-size: 15px; color: #555; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .rbar { height: 10px; background: #e5e5e5; border-radius: 5px; overflow: hidden; }
+  .rbar div { height: 100%; width: 0; background: var(--teal); }
+  .lvl { height: 4px; margin-top: 8px; background: #eee; border-radius: 2px; overflow: hidden; }
+  .lvl div { height: 100%; width: 0; background: #43a047; transition: width .08s; }
+
+  /* ---------- 스피킹 결과 ---------- */
+  .sitem { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; margin-top: 12px; }
+  .sitem .q { font-size: 16px; overflow-wrap: anywhere; }
+  .sitem .q .n { color: var(--muted); margin-right: 6px; }
+  .sitem .q .miss { color: var(--danger); background: #fdeceb; border-radius: 3px; padding: 0 2px; }
+  .sitem .tr { font-size: 15px; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; }
+  .sitem .tr .extra { color: #b26a00; }
+  .sitem .ra { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .sitem audio { height: 34px; max-width: 100%; }
+  .sitem .ok { color: #2e7d32; }
+  .sitem .bad { color: var(--danger); }
+
+  /* ---------- 단어 배열 (Build a Sentence) ---------- */
+  .bstage { flex: 1; min-height: 0; overflow: auto; width: 100%; max-width: 1000px; margin: 0 auto; padding: 28px 40px; display: flex; flex-direction: column; gap: 26px; }
+  .bdir { font-size: 18px; font-weight: 600; margin: 0; }
+  .brow { display: flex; gap: 20px; align-items: center; }
+  .brow .avatar { width: 84px; height: 84px; }
+  .bubble { background: #f2f2f2; border-radius: 14px; padding: 14px 18px; font-size: 18px; line-height: 1.5; }
+  .bline { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 8px; font-size: 18px; flex: 1; }
+  .bline .end { margin-left: -6px; }
+  .blank { min-width: 90px; height: 40px; border: none; border-bottom: 2px solid #555; background: none; padding: 0 8px; font-size: 18px; color: var(--x-ink); }
+  .blank.filled { background: #eaf3f3; border-radius: 6px 6px 0 0; }
+  .bpool { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding-top: 22px; border-top: 1px solid var(--x-line); }
+  .chip { border: 1px solid #9aa5a6; background: #fff; border-radius: 8px; padding: 8px 16px; font-size: 18px; color: var(--x-ink); }
+  .chip:hover { background: #eef5f5; }
+  .chip.used { visibility: hidden; }
+  @media (max-width: 640px) { .bstage { padding: 20px 16px; } .brow .avatar { width: 56px; height: 56px; } }
 </style>
 </head>
 <body>
 
 <!-- ===================== 설정 화면 ===================== -->
-<div class="setup-head" id="top-head"><span class="home" title="처음 화면으로">Writing Practice</span></div>
+<div class="setup-head" id="top-head"><span class="home" title="처음 화면으로">TOEFL Practice</span></div>
 <div id="setup-wrap">
 <div id="setup" class="setup">
+  <div class="sections">
+    <button class="sec on" data-sec="writing">Writing</button>
+    <button class="sec" data-sec="speaking">Speaking</button>
+  </div>
   <div class="hero">
     <div class="top">
       <h1>문제 붙여넣기</h1>
       <div class="seg" id="raw-type">
+        <button data-type="build">Build a Sentence</button>
         <button data-type="email" class="on">Write an Email</button>
         <button data-type="discussion">Academic Discussion</button>
+        <button data-type="repeat" class="hidden">Listen and Repeat</button>
+        <button data-type="interview" class="hidden">Take an Interview</button>
       </div>
     </div>
     <textarea class="field" id="raw" placeholder="문제 전체를 그대로 붙여넣으세요."></textarea>
+    <div class="sopts hidden" id="sopts">
+      <div><label>목소리</label><select id="s-voice"></select></div>
+      <div><label>속도</label><select id="s-rate"><option value="0.8">0.8×</option><option value="0.9">0.9×</option><option value="1" selected>1.0×</option><option value="1.1">1.1×</option></select></div>
+      <div><label>답변 시간(초)</label><input type="number" id="s-secs" min="3" max="120" step="1"></div>
+      <button class="textbtn" id="s-preview" style="margin-bottom:7px">미리 듣기</button>
+    </div>
     <div class="go">
       <button class="btn primary" id="raw-start">시작</button>
+      <button class="btn hidden" id="s-save">문제 저장</button>
+      <span class="hidden" id="b-opts" style="font-size:14px">시간(분) <input type="number" id="b-time" value="6" min="1" max="60" step="0.5" style="width:70px;border:1px solid var(--line);border-radius:4px;padding:6px 8px;font:inherit"></span>
     </div>
     <p class="msg" id="raw-msg"></p>
   </div>
@@ -367,6 +437,65 @@
   </details>
 </div>
 
+<!-- ===================== 단어 배열 시험 화면 ===================== -->
+<div id="bexam" class="exam hidden">
+  <div class="exam-head">
+    <div class="title"><span class="home" title="처음 화면으로">Writing</span></div>
+    <button class="next" id="b-next">Next <svg viewBox="0 0 12 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l7 7-7 7"/></svg></button>
+  </div>
+  <div class="subhead">
+    <span id="b-count">Question 1 of 1</span>
+    <span class="tright">
+      <span class="timer" id="b-timer">00:00:00</span>
+      <button class="linkbtn" id="toggle-btime"><span class="ico"></span><span class="lbl">Hide Timer</span></button>
+    </span>
+  </div>
+  <div class="bstage">
+    <p class="bdir">Make an appropriate sentence.</p>
+    <div id="b-ctx"></div>
+    <div class="brow" id="b-ans"></div>
+    <div class="bpool" id="b-pool"></div>
+  </div>
+</div>
+
+<!-- ===================== 스피킹 시험 화면 ===================== -->
+<div id="sexam" class="exam hidden">
+  <div class="exam-head">
+    <div class="title"><span class="home" title="처음 화면으로">Speaking</span></div>
+    <button class="next" id="s-next">Next <svg viewBox="0 0 12 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l7 7-7 7"/></svg></button>
+  </div>
+  <div class="subhead">
+    <span id="s-count">Question 1 of 1</span>
+    <span class="tright">
+      <button class="linkbtn" id="toggle-text"><span class="ico"></span><span class="lbl">Show Text</span></button>
+    </span>
+  </div>
+  <div class="stage">
+    <div id="s-who"></div>
+    <p class="stage-dir" id="s-dir"></p>
+    <p class="stage-text hidden" id="s-text"></p>
+    <div class="stage-status" id="s-status"></div>
+    <div class="rbox">
+      <div class="rt"><span>Response Time</span><span id="s-left">00:00:00</span></div>
+      <div class="rbar"><div id="s-bar"></div></div>
+      <div class="lvl"><div id="s-lvl"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 스피킹 결과 화면 ===================== -->
+<div id="sresult" class="result hidden">
+  <h1 id="sr-title" style="font-size:22px;margin:8px 0 0">결과</h1>
+  <div class="stats" id="sr-stats"></div>
+  <div id="sr-list"></div>
+  <p class="msg" id="sr-note"></p>
+  <div class="actions">
+    <button class="btn primary" id="sr-copy">문제+받아쓰기 복사</button>
+    <button class="btn" id="sr-retry">같은 문제 다시</button>
+    <button class="btn" id="sr-home">처음으로</button>
+  </div>
+</div>
+
 <div id="modal" class="modal-bg hidden">
   <div class="modal">
     <h3 id="m-title"></h3>
@@ -399,15 +528,17 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const show = (id) => {
-    ['setup', 'exam', 'result'].forEach(x => $(x === 'setup' ? 'setup-wrap' : x).classList.toggle('hidden', x !== id));
-    $('top-head').classList.toggle('hidden', id === 'exam');
+    ['setup', 'exam', 'result', 'sexam', 'sresult', 'bexam'].forEach(x => $(x === 'setup' ? 'setup-wrap' : x).classList.toggle('hidden', x !== id));
+    $('top-head').classList.toggle('hidden', ['exam', 'sexam', 'bexam'].includes(id));
   };
 
   // 시험 화면은 1400×788 기준으로 디자인 → 실제 시험 환경인 1920×1080에서 약 1.37배로 실제 화면과 같은 비율.
   const fitExam = () => {
     const z = Math.min(1.6, Math.max(1, Math.min(innerWidth / 1400, innerHeight / 788)));
-    $('exam').style.zoom = z;
-    $('exam').style.height = z === 1 ? '' : (innerHeight / z) + 'px';
+    ['exam', 'sexam', 'bexam'].forEach(id => {
+      $(id).style.zoom = z;
+      $(id).style.height = z === 1 ? '' : (innerHeight / z) + 'px';
+    });
   };
   addEventListener('resize', fitExam);
   fitExam();
@@ -453,10 +584,14 @@
     document.querySelector(`.tab[data-tab="${p.type}"]`).click();
     if (!noScroll) { $('manual').open = true; $('manual').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   };
-  const titleOf = (p) => p.type === 'email'
-    ? (p.subject || p.scenario.slice(0, 60) || '(제목 없음)')
-    : (p.question.length > 70 ? p.question.slice(0, 70) + '…' : p.question || '(질문 없음)');
-  const typeLabel = (t) => t === 'email' ? 'Email' : 'Discussion';
+  const cut = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
+  const titleOf = (p) => p.type === 'email' ? (p.subject || p.scenario.slice(0, 60) || '(제목 없음)')
+    : p.type === 'discussion' ? cut(p.question, 70) || '(질문 없음)'
+    : cut(p.type === 'build' ? buildText(p.items[0]) : p.items[0] || '', 70) + (p.items.length > 1 ? ` 외 ${p.items.length - 1}개` : '');
+  const typeLabel = (t) => ({ build: 'Build', email: 'Email', discussion: 'Discussion', repeat: 'Repeat', interview: 'Interview' })[t];
+  const MANUAL = ['email', 'discussion'];
+  const SPEAK = ['repeat', 'interview'];
+  const secOf = (t) => SPEAK.includes(t) ? 'speaking' : 'writing';
 
   document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => {
     fields[b.dataset.clear].forEach(id => { if (!id.endsWith('time')) $(id).value = ''; });
@@ -554,15 +689,40 @@
     return p;
   }
   // 붙여넣기 문제 유형은 직접 고름 (자동 인식 X). 마지막 선택 기억.
+  // Writing / Speaking은 붙여넣기 칸 내용을 따로 기억
+  const PH = {
+    build: '대화 상대의 말(없어도 됨) 다음 줄에 정답 문장을 쓰세요. 문제끼리는 빈 줄로 구분.\n\n'
+      + 'What did you think of the field trip?\nI / really enjoyed / [the] / museum visit / the most.\n\n'
+      + '• 보기 덩어리는 / 로 나누기 (없으면 단어마다 나눔)\n• [ ] 안은 미리 채워진 단어\n• extra: 단어 → 정답에 안 쓰는 함정 보기',
+    email: '문제 전체를 그대로 붙여넣으세요.', discussion: '문제 전체를 그대로 붙여넣으세요.',
+    repeat: '따라 말할 문장들을 붙여넣으세요. 한 문장씩 읽어줍니다.',
+    interview: '인터뷰 질문을 한 줄에 하나씩 붙여넣으세요.',
+  };
+  const drafts = { writing: '', speaking: '' };
   let rawType = store.get('tw_rawtype', 'email');
   const setRawType = (t) => {
-    rawType = t; store.set('tw_rawtype', t);
-    document.querySelectorAll('#raw-type button').forEach(b => b.classList.toggle('on', b.dataset.type === t));
-    document.querySelector(`.tab[data-tab="${t}"]`).click();
+    const prev = secOf(rawType), sec = secOf(t);
+    if (prev !== sec) { drafts[prev] = $('raw').value; $('raw').value = drafts[sec]; $('raw-msg').textContent = ''; }
+    rawType = t; store.set('tw_rawtype', t); store.set('tw_last_' + sec, t);
+    document.querySelectorAll('#raw-type button').forEach(b => {
+      b.classList.toggle('on', b.dataset.type === t);
+      b.classList.toggle('hidden', secOf(b.dataset.type) !== sec);
+    });
+    document.querySelectorAll('.sec').forEach(b => b.classList.toggle('on', b.dataset.sec === sec));
+    $('raw').placeholder = PH[t];
+    $('manual').classList.toggle('hidden', !MANUAL.includes(t));
+    $('sopts').classList.toggle('hidden', sec !== 'speaking');
+    $('s-save').classList.toggle('hidden', MANUAL.includes(t));
+    $('b-opts').classList.toggle('hidden', t !== 'build');
+    $('s-secs').placeholder = t === 'interview' ? '45' : '자동';
     filledRaw = '';
+    if (!MANUAL.includes(t)) return;
+    document.querySelector(`.tab[data-tab="${t}"]`).click();
     if ($('manual').open && $('raw').value.trim()) fromRaw();
   };
   document.querySelectorAll('#raw-type button').forEach(b => b.onclick = () => setRawType(b.dataset.type));
+  document.querySelectorAll('.sec').forEach(b => b.onclick = () =>
+    setRawType(store.get('tw_last_' + b.dataset.sec, b.dataset.sec === 'writing' ? 'email' : 'repeat')));
 
   // 직접 입력을 펼칠 때, 새로 붙여넣은 내용이 있으면 그걸로 칸을 채워서 보여줌
   let filledRaw = '';
@@ -571,7 +731,20 @@
     if ($('manual').open && raw.trim() && raw !== filledRaw) fromRaw();
   });
   setRawType(rawType);
-  $('raw-start').onclick = () => { const p = fromRaw(); if (p) startExam(p); };
+  $('raw-start').onclick = () => {
+    if (rawType === 'build') { startBuild(parseBuild($('raw').value)); return; }
+    if (secOf(rawType) === 'speaking') { startSpeaking(parseSpeaking($('raw').value, rawType)); return; }
+    const p = fromRaw(); if (p) startExam(p);
+  };
+  $('s-save').onclick = () => {
+    const p = rawType === 'build' ? parseBuild($('raw').value) : parseSpeaking($('raw').value, rawType);
+    if (!p.items.length) { $('raw-msg').textContent = '붙여넣은 내용이 없습니다.'; return; }
+    const list = store.get('tw_saved', []);
+    list.unshift({ ...p, id: Date.now() });
+    store.set('tw_saved', list);
+    renderLists();
+    $('raw-msg').textContent = '저장했습니다.';
+  };
   window.__parseProblem = parseProblem;
 
   // ---------- 목록 ----------
@@ -588,7 +761,10 @@
     const hist = store.get('tw_history', []);
     $('history-list').innerHTML = hist.length ? hist.map(h => `
       <li><div><div class="t"><span class="pill">${typeLabel(h.problem.type)}</span>${esc(titleOf(h.problem))}</div>
-      <div class="meta">${new Date(h.at).toLocaleString()} · ${h.words}단어 · ${fmtShort(h.used)}</div></div>
+      <div class="meta">${new Date(h.at).toLocaleString()} · ${h.problem.type === 'build'
+        ? `${h.correct.filter(Boolean).length}/${h.problem.items.length} 정답`
+        : secOf(h.problem.type) === 'speaking'
+        ? `${h.problem.items.length}문항${h.score != null ? ` · 정확도 ${h.score}%` : ''}` : `${h.words}단어`} · ${fmtShort(h.used)}</div></div>
       <div class="acts">
         <button class="textbtn danger" data-act="hdel" data-id="${h.at}">삭제</button>
         <button class="btn" data-act="view" data-id="${h.at}">보기</button>
@@ -608,11 +784,21 @@
     const id = Number(b.dataset.id);
     const saved = store.get('tw_saved', []), hist = store.get('tw_history', []);
     const p = saved.find(x => x.id === id), h = hist.find(x => x.at === id);
+    const speaking = (x) => secOf(x.type) === 'speaking';
     switch (b.dataset.act) {
-      case 'start': startExam(p); break;
-      case 'load': fillForm(p); break;
+      case 'start': p.type === 'build' ? startBuild(p) : speaking(p) ? startSpeaking(p) : startExam(p); break;
+      case 'load':
+        if (p.type === 'build') {
+          setRawType('build'); $('raw').value = p.raw; $('b-time').value = p.minutes;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          break;
+        }
+        if (!speaking(p)) { fillForm(p); break; }
+        setRawType(p.type); $('raw').value = p.items.join('\n'); $('s-secs').value = p.seconds || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        break;
       case 'del': if (confirm('이 문제를 삭제할까요?')) { store.set('tw_saved', saved.filter(x => x.id !== id)); renderLists(); } break;
-      case 'view': showResult(h); break;
+      case 'view': h.problem.type === 'build' ? showBuildResult(h) : speaking(h.problem) ? showSpeakingResult(h) : showResult(h); break;
       case 'hdel': if (confirm('이 기록을 삭제할까요?')) { store.set('tw_history', hist.filter(x => x.at !== id)); renderLists(); } break;
     }
   });
@@ -850,12 +1036,512 @@
     const inExam = !$('exam').classList.contains('hidden') && !finished;
     if (inExam && !confirm('시험을 그만두고 처음 화면으로 갈까요? 쓰던 답안은 저장되지 않습니다.')) return;
     if (inExam) { finished = true; clearInterval(tick); }
+    if (speakingNow()) {
+      if (!confirm('연습을 그만두고 처음 화면으로 갈까요? 녹음은 저장되지 않습니다.')) return;
+      stopSpeaking(sp);
+    }
+    if (buildNow()) {
+      if (!confirm('시험을 그만두고 처음 화면으로 갈까요? 푼 답은 저장되지 않습니다.')) return;
+      bx.done = true; clearInterval(bx.tick);
+    }
     $('modal').classList.add('hidden');
     show('setup'); window.scrollTo(0, 0);
   });
 
   // 시험 중 새로고침/닫기 경고
-  window.addEventListener('beforeunload', (e) => { if (!$('exam').classList.contains('hidden') && !finished) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => {
+    if ((!$('exam').classList.contains('hidden') && !finished) || speakingNow() || buildNow()) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // ================= Build a Sentence =================
+  // 문제 형식: (상대 말 줄) + 정답 줄. 정답의 / = 보기 덩어리 경계, [ ] = 미리 채워진 단어, extra: = 함정 보기
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  function buildText(it, fills) {
+    let k = 0;
+    const s = it.parts.map(x => x.fixed ? x.t : fills ? (fills[k++] || '___') : x.t).join(' ') + it.end;
+    return cap(s);
+  }
+  function parseBuild(raw) {
+    const DROP = /^(build a sentence|make an appropriate sentence|move the words|directions?\b|question \d+( of \d+)?$)/i;
+    const EXTRA = /^(extra|distractor|오답|추가)\s*:\s*/i;
+    const LABEL = /^[A-Z][\w.' ]{0,20}:\s+/;
+    const marked = (l) => /\/|\[[^\]]+\]/.test(l);
+    const blocks = raw.replace(/\r/g, '').replace(/ /g, ' ').split(/\n\s*\n/)
+      .map(b => b.split('\n').map(l => l.trim().replace(BULLET, '')).filter(l => l && !DROP.test(l)))
+      .filter(b => b.length);
+    const all = blocks.flat();
+    let groups;
+    if (all.some(l => !EXTRA.test(l) && marked(l))) {
+      // 표시(/, [ ])가 있는 줄이 정답, 그 앞의 표시 없는 줄은 상대 말
+      groups = []; let cur = [];
+      for (const l of all) {
+        if (EXTRA.test(l)) { (cur.length || !groups.length ? cur : groups[groups.length - 1]).push(l); continue; }
+        cur.push(l);
+        if (marked(l)) { groups.push(cur); cur = []; }
+      }
+    } else if (blocks.length === 1 && blocks[0].filter(l => !EXTRA.test(l)).length > 2) {
+      // 빈 줄 없이 여러 줄: "A: / B:" 꼴이면 두 줄씩, 아니면 한 줄이 한 문제
+      const ls = blocks[0], labeled = ls.filter(l => !EXTRA.test(l)).every(l => LABEL.test(l));
+      groups = [];
+      for (const l of ls) {
+        const last = groups[groups.length - 1];
+        if (last && (EXTRA.test(l) || (labeled && last.filter(x => !EXTRA.test(x)).length === 1))) last.push(l);
+        else groups.push([l]);
+      }
+    } else groups = blocks;
+
+    const items = groups.map(g => {
+      const extras = g.filter(l => EXTRA.test(l)).flatMap(l => l.replace(EXTRA, '').split(/[\/,]/)).map(s => s.trim()).filter(Boolean);
+      const ls = g.filter(l => !EXTRA.test(l)).map(l => l.replace(LABEL, ''));
+      if (!ls.length) return null;
+      let body = ls.pop().trim(), end = '';
+      const m = body.match(/\s*([.?!]+)$/);
+      if (m) { end = m[1]; body = body.slice(0, -m[0].length); }
+      const slash = body.includes('/'), parts = [];
+      body.split(/(\[[^\]]*\])/).forEach(seg => {
+        if (/^\[.*\]$/.test(seg)) { const t = seg.slice(1, -1).trim(); if (t) parts.push({ t, fixed: true }); return; }
+        seg.split(slash ? '/' : /\s+/).map(s => s.trim()).filter(Boolean).forEach(t => parts.push({ t, fixed: false }));
+      });
+      // 첫 보기가 대문자면 정답 위치가 티 나므로 소문자로 (I 는 그대로)
+      const f = parts[0];
+      if (f && !f.fixed && /^[A-Z][a-z]/.test(f.t) && !/^I\b/.test(f.t)) f.t = f.t[0].toLowerCase() + f.t.slice(1);
+      return parts.some(x => !x.fixed) ? { ctx: ls.join(' '), parts, extras, end } : null;
+    }).filter(Boolean);
+    return { type: 'build', raw, items, minutes: parseFloat($('b-time').value) || 6 };
+  }
+
+  let bx = null;
+  const buildNow = () => !!bx && !bx.done && !$('bexam').classList.contains('hidden');
+  function startBuild(p) {
+    if (!p.items.length) { $('raw-msg').textContent = '문장을 찾지 못했습니다.'; return; }
+    if (bx) clearInterval(bx.tick);
+    bx = { p, i: 0, faces: pickFaces(p.raw || titleOf(p)), states: [], startedAt: Date.now(), endAt: Date.now() + p.minutes * 60000 };
+    show('bexam');
+    renderBuild();
+    bx.tick = setInterval(buildTimer, 200);
+    buildTimer();
+  }
+  function buildTimer() {
+    const left = (bx.endAt - Date.now()) / 1000;
+    $('b-timer').textContent = fmt(left);
+    if (left <= 0 && !bx.done) finishBuild(true);
+  }
+  function buildState(i) {
+    if (bx.states[i]) return bx.states[i];
+    const it = bx.p.items[i];
+    const answer = it.parts.filter(x => !x.fixed).map(x => x.t), chunks = answer.concat(it.extras);
+    let order;
+    for (let n = 0; n < 10; n++) {
+      order = chunks.map((_, k) => k).sort(() => Math.random() - 0.5);
+      if (chunks.length < 2 || order.some((k, j) => chunks[k] !== chunks[j])) break;
+    }
+    return bx.states[i] = { chunks, order, fill: Array(answer.length).fill(null) };
+  }
+  function renderBuild() {
+    const { p, i, faces } = bx, it = p.items[i], st = buildState(i);
+    $('b-count').textContent = `Question ${i + 1} of ${p.items.length}`;
+    $('b-ctx').innerHTML = it.ctx ? `<div class="brow">${face(faces[0])}<div class="bubble">${esc(it.ctx)}</div></div>` : '';
+    let k = 0;
+    const line = it.parts.map((x, idx) => {
+      const show = (t) => esc(idx === 0 ? cap(t) : t);
+      if (x.fixed) return `<span>${show(x.t)}</span>`;
+      const b = k++, c = st.fill[b];
+      return `<button class="blank${c != null ? ' filled' : ''}" data-blank="${b}">${c != null ? show(st.chunks[c]) : ''}</button>`;
+    }).join('') + (it.end ? `<span class="end">${esc(it.end)}</span>` : '');
+    $('b-ans').innerHTML = `${face(faces[1])}<div class="bline">${line}</div>`;
+    $('b-pool').innerHTML = st.order.map(c =>
+      `<button class="chip${st.fill.includes(c) ? ' used' : ''}" data-chip="${c}">${esc(st.chunks[c])}</button>`).join('');
+  }
+  // 보기 누르면 첫 빈칸에, 채운 칸 누르면 다시 보기로
+  $('bexam').addEventListener('click', (e) => {
+    if (!bx || bx.done) return;
+    const st = bx.states[bx.i], chip = e.target.closest('[data-chip]'), blank = e.target.closest('[data-blank]');
+    if (chip) { const at = st.fill.indexOf(null); if (at < 0) return; st.fill[at] = Number(chip.dataset.chip); }
+    else if (blank) st.fill[Number(blank.dataset.blank)] = null;
+    else return;
+    renderBuild();
+  });
+  setToggle($('toggle-btime'), false, 'Timer');
+  $('toggle-btime').onclick = () => setToggle($('toggle-btime'), $('b-timer').classList.toggle('hidden'), 'Timer');
+  $('b-next').onclick = () => {
+    if (!bx || bx.done) return;
+    if (bx.i < bx.p.items.length - 1) { bx.i++; renderBuild(); return; }
+    modal('Are you sure you want to continue?', 'You will not be able to return to these questions.', () => finishBuild(false));
+  };
+
+  function finishBuild(timeUp) {
+    bx.done = true;
+    clearInterval(bx.tick);
+    $('modal').classList.add('hidden');
+    const p = bx.p, nj = (a) => a.join(' ').toLowerCase().replace(/\s+/g, ' ').trim();
+    const answers = p.items.map((_, i) => { const st = bx.states[i]; return st ? st.fill.map(c => c == null ? null : st.chunks[c]) : []; });
+    const correct = p.items.map((it, i) => {
+      const want = it.parts.filter(x => !x.fixed).map(x => x.t), got = answers[i];
+      return got.length === want.length && got.every(x => x != null) && nj(got) === nj(want);
+    });
+    const used = Math.min((Date.now() - bx.startedAt) / 1000, p.minutes * 60);
+    const rec = { at: Date.now(), problem: p, answers, correct, used, timeUp };
+    const hist = store.get('tw_history', []);
+    hist.unshift(rec); store.set('tw_history', hist.slice(0, 200));
+    renderLists();
+    if (timeUp) {
+      $('b-timer').textContent = '00:00:00';
+      modal('Time is up', 'Your response has been saved.', () => showBuildResult(rec));
+      $('m-cancel').classList.add('hidden');
+    } else showBuildResult(rec);
+  }
+  function showBuildResult(rec) {
+    curSRec = rec;
+    $('m-cancel').classList.remove('hidden');
+    const p = rec.problem;
+    $('sr-title').textContent = 'Build a Sentence' + (rec.timeUp ? ' — 시간 종료' : ' — 결과');
+    $('sr-stats').innerHTML = `
+      <div class="stat"><div class="k">정답</div><div class="v">${rec.correct.filter(Boolean).length} / ${p.items.length}</div></div>
+      <div class="stat"><div class="k">사용 시간</div><div class="v">${fmtShort(rec.used)} / ${fmtShort(p.minutes * 60)}</div></div>`;
+    $('sr-list').innerHTML = p.items.map((it, i) => `<div class="sitem">
+      <div class="q"><span class="n">${i + 1}.</span><span class="pill">${rec.correct[i] ? '정답' : '오답'}</span>${esc(it.ctx)}</div>
+      <div class="tr">내 답: <span class="${rec.correct[i] ? 'ok' : 'bad'}">${esc(buildText(it, rec.answers[i]))}</span></div>
+      ${rec.correct[i] ? '' : `<div class="tr">정답: ${esc(buildText(it))}</div>`}
+    </div>`).join('');
+    $('sr-note').textContent = '';
+    show('sresult');
+    window.scrollTo(0, 0);
+  }
+
+  // ================= Speaking =================
+  // 문장 나누기 (Dr. / Mr. 같은 약어에서는 안 끊음)
+  const sentences = (t) => t.split(/(?<=[.!?]["'”’)\]]*)\s+(?=["'“‘(]?[A-Z0-9])/)
+    .reduce((out, s) => {
+      const prev = out[out.length - 1];
+      if (prev && /\b(Dr|Mr|Ms|Mrs|Prof|St|Jr|Sr|vs|etc|e\.g|i\.e)\.$/i.test(prev)) out[out.length - 1] = prev + ' ' + s;
+      else out.push(s);
+      return out;
+    }, []).map(s => s.trim()).filter(Boolean);
+
+  // 따라말하기는 문장 단위, 인터뷰는 줄 단위로 한 문항
+  function parseSpeaking(raw, type) {
+    const DROP = /^(directions?:?|listen and repeat|take an interview|question \d+( of \d+)?|interviewer:?)$/i;
+    let items = raw.replace(/\r/g, '').replace(/ /g, ' ').split('\n')
+      .map(l => l.trim().replace(BULLET, '').replace(/^(q\s*\d+|question\s*\d+|interviewer)\s*[:.)-]\s*/i, '').trim())
+      .filter(l => l && !DROP.test(l));
+    if (type === 'repeat') items = items.flatMap(sentences);
+    return { type, items, seconds: parseFloat($('s-secs').value) || null };
+  }
+  // 따라말하기 답변 시간: 문장 길이에 따라 8~15초, 인터뷰는 45초
+  const respSecs = (p, i) => p.seconds || (p.type === 'interview' ? 45
+    : Math.min(15, Math.max(8, Math.round(countWords(p.items[i]) * 0.6) + 5)));
+
+  // ---------- TTS ----------
+  const hasTTS = 'speechSynthesis' in window;
+  const PREF = ['Google US English', 'Samantha', 'Ava', 'Allison', 'Microsoft Aria', 'Microsoft Jenny', 'Alex'];
+  function loadVoices() {
+    const vs = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang));
+    if (!vs.length) return;
+    const us = (v) => v.lang.replace('_', '-') === 'en-US' ? 0 : 1;
+    vs.sort((a, b) => us(a) - us(b));
+    const saved = store.get('tw_voice', '');
+    const def = vs.find(v => v.name === saved) || PREF.map(n => vs.find(v => v.name.startsWith(n))).find(Boolean) || vs[0];
+    $('s-voice').innerHTML = vs.map(v => `<option value="${esc(v.name)}"${v === def ? ' selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('');
+  }
+  if (hasTTS) { loadVoices(); speechSynthesis.addEventListener('voiceschanged', loadVoices); }
+  $('s-voice').onchange = () => store.set('tw_voice', $('s-voice').value);
+  $('s-rate').value = String(store.get('tw_rate', 1));
+  $('s-rate').onchange = () => store.set('tw_rate', parseFloat($('s-rate').value));
+
+  // 긴 글은 Chrome에서 중간에 끊기는 문제가 있어서 문장마다 나눠서 읽음
+  let utts = [];
+  function speak(text, s) {
+    return new Promise(res => {
+      if (!hasTTS) return res();
+      speechSynthesis.cancel();
+      const voice = speechSynthesis.getVoices().find(v => v.name === $('s-voice').value);
+      const parts = sentences(text);
+      let n = 0;
+      const done = () => { if (++n >= parts.length) res(); };
+      if (s) s.wake = res;
+      utts = parts.map(t => {
+        const u = new SpeechSynthesisUtterance(t);
+        if (voice) u.voice = voice;
+        u.lang = voice ? voice.lang : 'en-US';
+        u.rate = parseFloat($('s-rate').value) || 1;
+        u.onend = u.onerror = done;
+        speechSynthesis.speak(u);
+        return u;
+      });
+      if (!parts.length) res();
+    });
+  }
+  $('s-preview').onclick = () => {
+    const p = parseSpeaking($('raw').value, rawType);
+    speak(p.items[0] || 'Welcome to the speaking section. Listen carefully.');
+  };
+
+  // ---------- 음성 인식 (받아쓰기) ----------
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  function listen() {
+    if (!SR) return null;
+    const r = { finals: [], interim: '', live: true, failed: false, n: 0 };
+    const start = () => {
+      const rec = new SR();
+      rec.lang = 'en-US'; rec.continuous = true; rec.interimResults = true;
+      rec.onresult = (e) => {
+        r.interim = '';
+        for (let k = e.resultIndex; k < e.results.length; k++) {
+          const res = e.results[k];
+          if (res.isFinal) r.finals.push(res[0].transcript.trim()); else r.interim += res[0].transcript;
+        }
+      };
+      rec.onerror = (e) => { if (/not-allowed|service-not-allowed|audio-capture/.test(e.error)) r.failed = true; };
+      // 조용하면 Chrome이 알아서 끝내버리므로 녹음 중이면 다시 시작
+      rec.onend = () => {
+        if (r.interim.trim()) { r.finals.push(r.interim.trim()); r.interim = ''; }
+        if (r.live && !r.failed && ++r.n < 30) start(); else if (r.done) r.done();
+      };
+      r.rec = rec;
+      try { rec.start(); } catch { r.failed = true; }
+    };
+    start();
+    return r;
+  }
+
+  // ---------- 녹음 ----------
+  function startRec(s) {
+    s.chunks = []; s.mr = null;
+    if (s.stream && window.MediaRecorder) {
+      try {
+        s.mr = new MediaRecorder(s.stream);
+        s.mr.ondataavailable = (e) => { if (e.data.size) s.chunks.push(e.data); };
+        s.mr.start();
+      } catch { s.mr = null; }
+    }
+    s.sr = listen();
+    s.recording = true;
+  }
+  // [녹음 URL, 받아쓰기] — 인식 결과는 조금 늦게 오므로 기다리지 않고 Promise로 넘김
+  function stopRec(s) {
+    s.recording = false;
+    const mr = s.mr, chunks = s.chunks, r = s.sr;
+    const audio = !mr ? null : new Promise(res => {
+      mr.onstop = () => res(URL.createObjectURL(new Blob(chunks, { type: mr.mimeType })));
+      try { mr.stop(); } catch { res(null); }
+    });
+    const text = !r ? null : new Promise(res => {
+      const fin = () => res(r.failed && !r.finals.length ? null : r.finals.join(' ').replace(/\s+/g, ' ').trim());
+      r.done = fin; r.live = false;
+      try { r.rec.stop(); } catch { fin(); }
+      setTimeout(fin, 2500);
+    });
+    return Promise.all([audio, text]);
+  }
+
+  function beep(ctx) {
+    if (!ctx) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = 880; g.gain.value = 0.15;
+    o.connect(g).connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.25);
+  }
+
+  // ---------- 진행 ----------
+  let sp = null;
+  const speakingNow = () => !!sp && !sp.done && !sp.stopped && !$('sexam').classList.contains('hidden');
+  const pause = (s, ms) => new Promise(r => { const t = setTimeout(r, ms); s.wake = () => { clearTimeout(t); r(); }; });
+  function countdown(s, secs) {
+    return new Promise(res => {
+      const t0 = Date.now();
+      const step = () => {
+        const el = Math.min(secs, (Date.now() - t0) / 1000);
+        $('s-left').textContent = fmt(secs - el);
+        $('s-bar').style.width = (el / secs * 100) + '%';
+        if (el >= secs) end();
+      };
+      const iv = setInterval(step, 100);
+      const end = () => { clearInterval(iv); res(); };
+      s.wake = end;
+      step();
+    });
+  }
+  const SPK_ICON = '<div class="spk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></div>';
+  let showText = false;
+  setToggle($('toggle-text'), true, 'Text');
+  $('toggle-text').onclick = () => {
+    showText = !showText;
+    $('s-text').classList.toggle('hidden', !showText);
+    setToggle($('toggle-text'), !showText, 'Text');
+  };
+  const stage = (status, rec) => { $('s-status').textContent = status; $('s-status').classList.toggle('rec', !!rec); };
+
+  async function startSpeaking(p) {
+    if (!p.items.length) { $('raw-msg').textContent = '붙여넣은 내용이 없습니다.'; return; }
+    if (!hasTTS) { alert('이 브라우저는 음성 읽기(TTS)를 지원하지 않습니다.'); return; }
+    speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance('')); // 클릭 안에서 TTS 깨워두기
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const s = sp = { p, pending: [], ctx: AC ? new AC() : null };
+    try { s.stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch { if (!confirm('마이크를 쓸 수 없습니다. 녹음 없이 진행할까요?')) { stopSpeaking(s); return; } }
+    if (s.stream && s.ctx) {
+      const an = s.ctx.createAnalyser(); an.fftSize = 512;
+      s.ctx.createMediaStreamSource(s.stream).connect(an);
+      const buf = new Uint8Array(an.fftSize);
+      const loop = () => {
+        if (s.done || s.stopped) return;
+        an.getByteTimeDomainData(buf);
+        let sum = 0; for (const v of buf) { const x = (v - 128) / 128; sum += x * x; }
+        $('s-lvl').style.width = (s.recording ? Math.min(100, Math.sqrt(sum / buf.length) * 400) : 0) + '%';
+        s.raf = requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    $('s-who').innerHTML = p.type === 'interview' ? face(pickFaces(p.items[0])[0]) : SPK_ICON;
+    $('s-dir').textContent = p.type === 'repeat'
+      ? 'Listen to the speaker and repeat exactly what you hear. You will hear each sentence only once.'
+      : `An interviewer will ask you questions. Answer each question as completely as you can. You will have ${respSecs(p, 0)} seconds to respond. There is no preparation time.`;
+    show('sexam');
+    s.startedAt = Date.now();
+    runSpeaking(s);
+  }
+
+  async function runSpeaking(s) {
+    const p = s.p;
+    for (let i = 0; i < p.items.length; i++) {
+      if (s.stopped) return;
+      s.skip = false;
+      const secs = respSecs(p, i);
+      $('s-count').textContent = `Question ${i + 1} of ${p.items.length}`;
+      $('s-text').textContent = p.items[i];
+      $('s-left').textContent = fmt(secs); $('s-bar').style.width = '0';
+      stage('Listen');
+      await pause(s, 800);
+      if (!s.skip) await speak(p.items[i], s);
+      if (s.stopped) return;
+      if (s.skip) continue;
+      beep(s.ctx);
+      await pause(s, 300);
+      if (s.stopped) return;
+      startRec(s);
+      stage('Speak now', true);
+      await countdown(s, secs);
+      if (s.stopped) return;
+      s.pending[i] = stopRec(s);
+    }
+    finishSpeaking(s);
+  }
+  $('s-next').onclick = () => {
+    if (!sp || sp.done || sp.stopped) return;
+    sp.skip = true;
+    if (hasTTS) speechSynthesis.cancel();
+    if (sp.wake) sp.wake();
+  };
+
+  function cleanupSpeaking(s) {
+    if (s.stream) s.stream.getTracks().forEach(t => t.stop());
+    cancelAnimationFrame(s.raf);
+    if (s.ctx) s.ctx.close().catch(() => {});
+    $('s-lvl').style.width = '0';
+  }
+  function stopSpeaking(s) {
+    s.stopped = true;
+    if (hasTTS) speechSynthesis.cancel();
+    if (s.wake) s.wake();
+    if (s.recording) {
+      s.recording = false;
+      try { if (s.mr) s.mr.stop(); } catch {}
+      if (s.sr) { s.sr.live = false; try { s.sr.rec.stop(); } catch {} }
+    }
+    cleanupSpeaking(s);
+  }
+
+  // ---------- 채점 (따라말하기: 원문 단어 중 몇 개를 말했는지) ----------
+  const norm = (w) => w.toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9']/g, '');
+  function align(a, b) {
+    const A = a.map(norm), B = b.map(norm), n = A.length, m = B.length;
+    const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+      L[i][j] = A[i] && A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const ma = Array(n).fill(false), mb = Array(m).fill(false);
+    for (let i = 0, j = 0; i < n && j < m;) {
+      if (A[i] && A[i] === B[j]) { ma[i] = mb[j] = true; i++; j++; }
+      else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++;
+    }
+    return { ma, mb };
+  }
+  const words = (s) => (s || '').split(/\s+/).filter(Boolean);
+  function scoreOf(orig, said) {
+    const a = words(orig), { ma } = align(a, words(said));
+    const total = a.filter(w => norm(w)).length;
+    return total ? Math.round(ma.filter((x, k) => x && norm(a[k])).length / total * 100) : 0;
+  }
+
+  const audioCache = {};
+  async function finishSpeaking(s) {
+    s.done = true;
+    cleanupSpeaking(s);
+    stage('Saving…');
+    const res = await Promise.all(s.pending);
+    const p = s.p;
+    const answers = p.items.map((_, i) => res[i] ? res[i][1] : null);
+    const scores = p.type === 'repeat' ? answers.map((t, i) => t == null ? null : scoreOf(p.items[i], t)) : null;
+    const valid = (scores || []).filter(x => x != null);
+    const rec = {
+      at: Date.now(), problem: p, answers, scores,
+      score: valid.length ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length) : null,
+      used: (Date.now() - s.startedAt) / 1000,
+    };
+    audioCache[rec.at] = p.items.map((_, i) => res[i] ? res[i][0] : null);
+    const hist = store.get('tw_history', []);
+    hist.unshift(rec); store.set('tw_history', hist.slice(0, 200));
+    renderLists();
+    showSpeakingResult(rec);
+  }
+
+  // ---------- 스피킹 결과 ----------
+  let curSRec = null;
+  function showSpeakingResult(rec) {
+    curSRec = rec;
+    const p = rec.problem, urls = audioCache[rec.at] || [];
+    $('sr-title').textContent = (p.type === 'repeat' ? 'Listen and Repeat' : 'Take an Interview') + ' — 결과';
+    $('sr-stats').innerHTML = `
+      <div class="stat"><div class="k">문항</div><div class="v">${p.items.length}</div></div>
+      ${rec.score != null ? `<div class="stat"><div class="k">평균 정확도</div><div class="v">${rec.score}%</div></div>` : ''}
+      <div class="stat"><div class="k">사용 시간</div><div class="v">${fmtShort(rec.used)}</div></div>`;
+    $('sr-list').innerHTML = p.items.map((q, i) => {
+      const said = rec.answers[i];
+      let qHtml = esc(q), trHtml = said == null ? '<i>(받아쓰기 없음)</i>' : esc(said) || '<i>(인식된 말 없음)</i>';
+      if (p.type === 'repeat' && said != null) {
+        const a = words(q), b = words(said), { ma, mb } = align(a, b);
+        qHtml = a.map((w, k) => ma[k] || !norm(w) ? esc(w) : `<span class="miss">${esc(w)}</span>`).join(' ');
+        if (b.length) trHtml = b.map((w, k) => mb[k] ? esc(w) : `<span class="extra">${esc(w)}</span>`).join(' ');
+      }
+      const tag = p.type === 'repeat'
+        ? (rec.scores && rec.scores[i] != null ? `<span class="pill">${rec.scores[i]}%</span>` : '')
+        : (said ? `<span class="pill">${countWords(said)} words</span>` : '');
+      return `<div class="sitem">
+        <div class="q"><span class="n">${i + 1}.</span>${tag}${qHtml}</div>
+        <div class="tr">내 답: ${trHtml}</div>
+        <div class="ra">
+          <button class="textbtn" data-say="${i}">▶ 원문 듣기</button>
+          ${urls[i] ? `<audio controls preload="metadata" src="${urls[i]}"></audio>` : ''}
+        </div></div>`;
+    }).join('');
+    const notes = [];
+    if (!urls.some(Boolean)) notes.push('녹음은 이 페이지를 닫기 전까지만 다시 들을 수 있어요.');
+    if (rec.answers.every(a => a == null)) notes.push('받아쓰기는 브라우저 음성 인식을 씁니다 (Chrome·Safari, http(s) 주소에서만 동작).');
+    $('sr-note').textContent = notes.join(' ');
+    show('sresult');
+    window.scrollTo(0, 0);
+  }
+  $('sr-list').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-say]'); if (b) speak(curSRec.problem.items[Number(b.dataset.say)]);
+  });
+  $('sr-copy').onclick = (e) => {
+    const p = curSRec.problem;
+    if (p.type === 'build') return copy('[Build a Sentence]\n\n' + p.items.map((it, i) =>
+      `${i + 1}. ${it.ctx ? it.ctx + '\n   ' : ''}내 답: ${buildText(it, curSRec.answers[i])}${curSRec.correct[i] ? ' (정답)' : `\n   정답: ${buildText(it)}`}`).join('\n\n'), e.target);
+    copy(`[${p.type === 'repeat' ? 'Listen and Repeat' : 'Take an Interview'}]\n\n` + p.items.map((q, i) =>
+      `${i + 1}. ${q}\n   → ${curSRec.answers[i] ?? '(받아쓰기 없음)'}`).join('\n\n'), e.target);
+  };
+  $('sr-retry').onclick = () => curSRec.problem.type === 'build' ? startBuild(curSRec.problem) : startSpeaking(curSRec.problem);
+  $('sr-home').onclick = () => { if (hasTTS) speechSynthesis.cancel(); show('setup'); };
 
   renderLists();
 })();
