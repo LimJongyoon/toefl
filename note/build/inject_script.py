@@ -15,6 +15,7 @@ CSS = """<style id="ck-style">
 .progress .pbar i{display:block;height:100%;width:0;background:#1f7a3f;transition:width .3s}
 .progress p{margin:6px 0 0;font-size:17px}
 .progress a{color:#1f4b8f}
+.plink a{display:inline-block;margin-top:4px;padding:4px 14px;border:1.6px solid #1f4b8f;border-radius:8px;text-decoration:none;font-size:18px}
 .progress button{font:inherit;font-size:14px;background:none;border:1px solid #b9ae98;border-radius:6px;padding:1px 8px;color:#8a7f6a;cursor:pointer}
 </style>"""
 

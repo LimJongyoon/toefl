@@ -40,7 +40,8 @@ if cover and not cover.select_one(".progress"):
     p = BeautifulSoup('<div class="progress"><div class="pbar"><i></i></div>'
                       '<p><b class="pdone">0</b> / <span class="ptotal">0</span> 완료 · '
                       '<a class="resume" href="#cover">이어서 보기</a> · '
-                      '<button class="preset" type="button">체크 모두 지우기</button></p></div>', "html.parser")
+                      '<button class="preset" type="button">체크 모두 지우기</button></p>'
+                      '<p class="plink"><a href="practice.html">✎ 틀린 문제 다시 풀기 (연습문제)</a></p></div>', "html.parser")
     date = cover.select_one(".date")
     (date or cover.h1).insert_after(p)
 
