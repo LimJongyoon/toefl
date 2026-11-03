@@ -79,6 +79,8 @@ TYPE_CSS = """<style id="ty-style">
 #ty .tpltxt{border:1.4px solid var(--soft);border-radius:10px;padding:8px 12px;background:#fff;font-size:19px;line-height:1.6;transition:filter .2s}
 #ty .tpltxt.hide{filter:blur(7px);user-select:none}
 #ty .tpltxt p{margin:2px 0}
+#ty .qtxt{border-left:3px solid #2a8a7a;background:#f4f1e6;border-radius:0 8px 8px 0;padding:6px 12px;font-size:18px;line-height:1.5}
+#ty .qtxt p{margin:0}
 #ty .tpltxt .fx{font-weight:700;color:var(--ink)} #ty .tpltxt .fl{color:#9a9da6}
 #ty textarea{display:block;width:100%;box-sizing:border-box;min-height:300px;resize:vertical;border:1.4px solid #f0e2a0;border-radius:10px;outline:none;
   font-family:var(--hand);font-size:20px;line-height:32px;padding:0 12px;color:var(--ink);
@@ -107,7 +109,7 @@ TYPE_JS = r"""<script id="ty-script">
   function saveMemo(){ try{ localStorage.setItem(MEMO, JSON.stringify(memos)); }catch(e){} }
   var ov=document.createElement('div'); ov.id='ty';
   ov.innerHTML='<div class="win"><div class="top"><h3></h3><button class="hide">가리기</button><button class="close">닫기 ✕</button></div>'+
-    '<p class="lab">템플릿</p><div class="tpltxt"></div>'+
+    '<div class="qbox"></div><p class="lab">템플릿</p><div class="tpltxt"></div>'+
     '<p class="lab">메모지 — 여기에 따라 쓰기 (띄어쓰기·줄바꿈은 채점 안 함)</p><textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea>'+
     '<div class="bar"><button class="main grade">채점</button><button class="clear">지우기</button><label><input type="checkbox" class="ci"> 대소문자 무시</label></div>'+
     '<div class="res"><div class="score"><span class="big"></span><span class="cnt"></span></div>'+
@@ -121,6 +123,7 @@ TYPE_JS = r"""<script id="ty-script">
     cur=(h.querySelector('b')||{}).textContent||'T';
     q('h3').innerHTML='<b>'+cur+'</b>'+((h.querySelector('span')||{}).textContent||'');
     var ans=pr.querySelector('.ans');
+    var qq=pr.querySelector('.q'); q('.qbox').innerHTML=qq?'<p class="lab">문제</p><div class="qtxt">'+qq.innerHTML+'</div>':'';
     tplBox.innerHTML=ans.innerHTML;
     tplText=[].slice.call(ans.querySelectorAll('p')).map(function(p){ return p.textContent; }).join('\n');
     ta.value=memos[cur]||''; q('.res').style.display='none';
@@ -185,6 +188,36 @@ TYPE_JS = r"""<script id="ty-script">
 
 html = html.replace("</head>", TYPE_CSS + "</head>", 1)
 html = html.replace("</body>", TYPE_JS + "</body>", 1)
+# 마우스 휠로 쪽 넘기기 (세로 휠 → 다음/이전 쪽)
+WHEEL_JS = r"""<script id="wheel-script">
+(function(){
+  var book=document.querySelector('.book'); if(!book) return;
+  var sheets=[].slice.call(book.querySelectorAll('.sheet')), lock=false, acc=0, t=null;
+  function cur(){
+    var r=book.getBoundingClientRect(), mid=r.left+r.width/2, best=0, d=1e9;
+    sheets.forEach(function(s,i){ var b=s.getBoundingClientRect(), x=Math.abs(b.left+b.width/2-mid); if(x<d){d=x;best=i;} });
+    return best;
+  }
+  function go(i){
+    i=Math.max(0,Math.min(sheets.length-1,i));
+    sheets[i].scrollIntoView({behavior:'smooth',block:'nearest',inline:'start'});
+  }
+  book.addEventListener('wheel',function(e){
+    if(e.ctrlKey) return;                                   // 확대/축소는 그대로
+    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)) return;       // 트랙패드 가로 밀기는 그대로
+    var el=e.target;                                        // 안쪽 스크롤 칸(textarea 등)은 그대로
+    while(el && el!==book){ if(el.scrollHeight>el.clientHeight+1 && /(auto|scroll)/.test(getComputedStyle(el).overflowY)) return; el=el.parentElement; }
+    e.preventDefault();
+    if(lock) return;
+    acc+=e.deltaMode===1 ? e.deltaY*30 : e.deltaY;
+    clearTimeout(t); t=setTimeout(function(){ acc=0; },200);
+    if(Math.abs(acc)<40) return;
+    go(cur()+(acc>0?1:-1)); acc=0; lock=true;
+    setTimeout(function(){ lock=false; },550);
+  },{passive:false});
+})();
+</script>"""
+html = html.replace("</body>", WHEEL_JS + "</body>", 1)
 pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
 pathlib.Path(out).write_text(html, encoding="utf-8")
 print("written", out)
