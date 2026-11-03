@@ -62,6 +62,129 @@ JS = r"""<script id="ck-script">
 
 html = html.replace("</head>", CSS + "</head>", 1)
 html = html.replace("</body>", JS + "</body>", 1)
+# 2장 외울 것: 템플릿마다 따라쓰기(타이핑 채점) 창
+TYPE_CSS = """<style id="ty-style">
+.ty-open{font:inherit;font-size:15px;color:var(--area);background:var(--paper);border:1.4px solid var(--area);border-radius:7px;padding:0 9px;cursor:pointer;white-space:nowrap;align-self:center}
+.prob .h small + .ty-open{margin-left:0}
+#ty{position:fixed;inset:0;z-index:100;background:rgba(40,36,28,.55);display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+#ty.on{display:block}
+#ty .win{max-width:880px;margin:18px auto;background:#fffef8;border-radius:14px;padding:16px 18px 22px;font-family:var(--hand);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+#ty .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#ty .top h3{margin:0 auto 0 0;font-size:22px}
+#ty .top h3 b{color:#2a8a7a;margin-right:6px}
+#ty button{font:inherit;font-size:17px;border-radius:9px;padding:4px 14px;cursor:pointer;border:1.4px solid #b9ae98;background:#fff;color:var(--ink)}
+#ty button.main{background:#2856b3;border-color:#2856b3;color:#fff;padding:6px 22px}
+#ty button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#ty .lab{margin:14px 0 4px;color:var(--pencil);font-size:16px}
+#ty .tpltxt{border:1.4px solid var(--soft);border-radius:10px;padding:8px 12px;background:#fff;font-size:19px;line-height:1.6;transition:filter .2s}
+#ty .tpltxt.hide{filter:blur(7px);user-select:none}
+#ty .tpltxt p{margin:2px 0}
+#ty .tpltxt .fx{font-weight:700;color:var(--ink)} #ty .tpltxt .fl{color:#9a9da6}
+#ty textarea{display:block;width:100%;box-sizing:border-box;min-height:300px;resize:vertical;border:1.4px solid #f0e2a0;border-radius:10px;outline:none;
+  font-family:var(--hand);font-size:20px;line-height:32px;padding:0 12px;color:var(--ink);
+  background:repeating-linear-gradient(#fffbe6 0 31px,#f1e3a8 31px 32px);background-attachment:local}
+#ty .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+#ty .bar label{margin-left:auto;color:var(--pencil);font-size:16px;display:flex;gap:4px;align-items:center}
+#ty .res{display:none;margin-top:16px;border-top:1.6px dashed var(--soft);padding-top:10px}
+#ty .score{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+#ty .score .big{font-size:44px;line-height:1}
+#ty .score span{color:var(--pencil);font-size:16px}
+#ty .lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:15px;color:var(--pencil);margin:6px 0}
+#ty .view{white-space:pre-wrap;word-break:break-word;font-size:19px;line-height:1.75;background:#fff;border:1.4px solid var(--soft);border-radius:10px;padding:8px 12px}
+#ty .ok{color:#16803d}
+#ty .bad{color:#c62828;background:rgba(255,90,90,.22);text-decoration:line-through;border-radius:3px}
+#ty .miss{color:#a35a00;background:rgba(255,200,60,.35);border-bottom:2px solid #d08a00;border-radius:3px}
+#ty .rest{color:#c4c4c4}
+#ty .k{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+</style>"""
+
+TYPE_JS = r"""<script id="ty-script">
+(function(){
+  var probs=[].slice.call(document.querySelectorAll('.prob.tpl'));
+  if(!probs.length) return;
+  var MEMO='toefl-type-memo-v1', memos={};
+  try{ memos=JSON.parse(localStorage.getItem(MEMO)||'{}'); }catch(e){ memos={}; }
+  function saveMemo(){ try{ localStorage.setItem(MEMO, JSON.stringify(memos)); }catch(e){} }
+  var ov=document.createElement('div'); ov.id='ty';
+  ov.innerHTML='<div class="win"><div class="top"><h3></h3><button class="hide">가리기</button><button class="close">닫기 ✕</button></div>'+
+    '<p class="lab">템플릿</p><div class="tpltxt"></div>'+
+    '<p class="lab">메모지 — 여기에 따라 쓰기 (띄어쓰기·줄바꿈은 채점 안 함)</p><textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea>'+
+    '<div class="bar"><button class="main grade">채점</button><button class="clear">지우기</button><label><input type="checkbox" class="ci"> 대소문자 무시</label></div>'+
+    '<div class="res"><div class="score"><span class="big"></span><span class="cnt"></span></div>'+
+    '<div class="lg"><span><i class="k" style="background:rgba(70,215,110,.3);border:1px solid #16803d"></i>맞음</span><span><i class="k" style="background:rgba(255,90,90,.22);border:1px solid #c62828"></i>틀림·더 씀</span><span><i class="k" style="background:rgba(255,200,60,.35);border:1px solid #d08a00"></i>빠짐</span><span><i class="k" style="background:#f3f3f3;border:1px solid #c4c4c4"></i>아직 안 쓴 부분</span></div>'+
+    '<p class="lab">내가 쓴 글</p><div class="view vu"></div><p class="lab">템플릿 (빠뜨린 글자 표시)</p><div class="view vt"></div></div></div>';
+  document.body.appendChild(ov);
+  var q=function(s){ return ov.querySelector(s); };
+  var ta=q('textarea'), tplBox=q('.tpltxt'), cur=null, tplText='';
+  function open(pr){
+    var h=pr.querySelector('.h');
+    cur=(h.querySelector('b')||{}).textContent||'T';
+    q('h3').innerHTML='<b>'+cur+'</b>'+((h.querySelector('span')||{}).textContent||'');
+    var ans=pr.querySelector('.ans');
+    tplBox.innerHTML=ans.innerHTML;
+    tplText=[].slice.call(ans.querySelectorAll('p')).map(function(p){ return p.textContent; }).join('\n');
+    ta.value=memos[cur]||''; q('.res').style.display='none';
+    ov.classList.add('on'); document.body.style.overflow='hidden'; ov.scrollTop=0;
+  }
+  function close(){ ov.classList.remove('on'); document.body.style.overflow=''; }
+  probs.forEach(function(pr){
+    var b=document.createElement('button'); b.className='ty-open'; b.type='button'; b.textContent='✍ 따라쓰기';
+    b.addEventListener('click',function(e){ e.preventDefault(); open(pr); });
+    pr.querySelector('.h').appendChild(b);
+  });
+  q('.close').onclick=close;
+  ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && ov.classList.contains('on')) close(); });
+  q('.hide').onclick=function(){ var on=tplBox.classList.toggle('hide'); this.classList.toggle('on',on); this.textContent=on?'보이기':'가리기'; };
+  ta.addEventListener('input',function(){ memos[cur]=ta.value; saveMemo(); });
+  q('.clear').onclick=function(){ ta.value=''; memos[cur]=''; saveMemo(); q('.res').style.display='none'; ta.focus(); };
+
+  var isWS=function(c){ return /\s/.test(c); };
+  function norm(c,ci){ c=c.replace(/[‘’`´]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-'); return ci?c.toLowerCase():c; }
+  function esc(s){ return s.replace(/[&<>]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+  q('.grade').onclick=function(){
+    var ci=q('.ci').checked, A=Array.from(tplText), B=Array.from(ta.value), a=[], ai=[], b=[];
+    A.forEach(function(c,i){ if(!isWS(c)){ a.push(norm(c,ci)); ai.push(i); } });
+    B.forEach(function(c){ if(!isWS(c)) b.push(norm(c,ci)); });
+    var n=a.length, m=b.length, W=m+1, F=new Uint16Array((n+1)*(m+1)), i, j;
+    for(i=1;i<=n;i++) for(j=1;j<=m;j++)
+      F[i*W+j]= a[i-1]===b[j-1] ? F[(i-1)*W+j-1]+1 : Math.max(F[(i-1)*W+j],F[i*W+j-1]);
+    // 어디까지 썼는지: (맞음 - 빠짐)이 가장 큰 지점 → 중간까지만 써도 그 부분만 채점
+    var end=0, best=-1e9;
+    for(i=0;i<=n;i++){ var sc=2*F[i*W+m]-i; if(sc>=best){ best=sc; end=i; } }
+    var tOk=[], uOk=[], miss=[]; for(j=0;j<=m;j++) miss.push('');
+    i=end; j=m;
+    while(i>0||j>0){
+      if(i>0&&j>0&&a[i-1]===b[j-1]&&F[i*W+j]===F[(i-1)*W+j-1]+1){ tOk[i-1]=uOk[j-1]=true; i--; j--; }
+      else if(i>0&&(j===0||F[(i-1)*W+j]>=F[i*W+j-1])){ miss[j]=A[ai[i-1]]+miss[j]; i--; }
+      else j--;
+    }
+    var h='', k=0;
+    B.forEach(function(c){
+      if(isWS(c)){ h+=esc(c); return; }
+      if(miss[k]) h+='<span class="miss">'+esc(miss[k])+'</span>';
+      h+='<span class="'+(uOk[k]?'ok':'bad')+'">'+esc(c)+'</span>'; k++;
+    });
+    if(miss[m]) h+='<span class="miss">'+esc(miss[m])+'</span>';
+    q('.vu').innerHTML=h||'<span class="rest">(비어 있음)</span>';
+    var t=''; k=0;
+    A.forEach(function(c){
+      if(isWS(c)){ t+=esc(c); return; }
+      t+= k>=end ? '<span class="rest">'+esc(c)+'</span>' : tOk[k] ? esc(c) : '<span class="miss">'+esc(c)+'</span>'; k++;
+    });
+    q('.vt').innerHTML=t;
+    var ok=F[end*W+m], ex=m-ok;
+    var pct=end?Math.max(0,Math.round((ok-ex)/end*1000)/10):0;
+    q('.big').textContent=pct+'%';
+    q('.cnt').textContent='맞음 '+ok+' · 빠짐 '+(end-ok)+' · 틀림·더 씀 '+ex+' · 쓴 범위 '+end+'/'+n+'자'+(end<n?' (나머지는 채점 안 함)':'');
+    q('.res').style.display='block';
+    q('.res').scrollIntoView({behavior:'smooth',block:'start'});
+  };
+})();
+</script>"""
+
+html = html.replace("</head>", TYPE_CSS + "</head>", 1)
+html = html.replace("</body>", TYPE_JS + "</body>", 1)
 pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
 pathlib.Path(out).write_text(html, encoding="utf-8")
 print("written", out)

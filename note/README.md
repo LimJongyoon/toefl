@@ -1,6 +1,6 @@
 # 토플 오답노트
 
-- `index.html` — 오답노트 책 (항목별 체크, 진행률, 이어서 보기)
+- `index.html` — 오답노트 책 (항목별 체크, 진행률, 이어서 보기, 2장 템플릿 ✍ 따라쓰기 채점)
 - `practice.html` — 틀린 문제 다시 풀기 (Complete the Words · 객관식 · Build a Sentence · 고쳐 쓰기 · Listen and Repeat)
 - 체크·풀이 기록은 그 기기 브라우저에 저장됨
 
