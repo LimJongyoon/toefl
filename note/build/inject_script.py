@@ -52,8 +52,10 @@ JS = r"""<script id="ck-script">
   }
   if('IntersectionObserver' in window){
     var io=new IntersectionObserver(function(es){ es.forEach(function(e){
-      if(e.isIntersecting && e.target.id && e.target.id!=='cover'){ try{ localStorage.setItem(PAGE,e.target.id); }catch(x){} }
-    }); },{threshold:.6});
+      // 휴대폰에서는 쪽이 화면보다 길어서 비율 대신 화면의 절반 이상을 차지하면 본 것으로 침
+      var seen=e.isIntersecting && (e.intersectionRatio>=.6 || e.intersectionRect.height>=window.innerHeight*.5);
+      if(seen && e.target.id && e.target.id!=='cover'){ try{ localStorage.setItem(PAGE,e.target.id); }catch(x){} }
+    }); },{threshold:[0,.25,.5,.6,.75,1]});
     sheets.forEach(function(s){ io.observe(s); });
   }
   setResume(); paint();

@@ -24,6 +24,11 @@ async () => {
   const SAFE = 22;                       // 글꼴 렌더 차이 여유(px)
   const book = document.getElementById('book');
   const src = document.getElementById('src');
+  // 모바일(세로로 쌓은 표)용: 칸마다 머리글 이름을 data-l로 붙임
+  src.querySelectorAll('table').forEach(t => {
+    const hs = [...t.querySelectorAll('thead th')].map(h => h.textContent.trim());
+    t.querySelectorAll('tbody tr:not(.grp)').forEach(r => [...r.children].forEach((td, i) => { if (hs[i]) td.dataset.l = hs[i]; }));
+  });
   const chapters = [...src.querySelectorAll(':scope > .chapter')];
   const sheets = [];
   const KWN = 'h2, h3, .lead, .ch-h, .ch-lead';
